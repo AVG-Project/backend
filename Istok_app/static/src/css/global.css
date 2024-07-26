@@ -1,0 +1,247 @@
+@font-face {
+  font-family: "VelaSans";
+  src: url(../assets/fonts/VelaSans/Static/Web/VelaSans-Light.woff2)
+      format("woff2"),
+    url(../assets/fonts/VelaSans/Static/Web/VelaSans-Light.woff) format("woff");
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "VelaSans";
+  src: url(../assets/fonts/VelaSans/Static/Web/VelaSans-Medium.woff2)
+      format("woff2"),
+    url(../assets/fonts/VelaSans/Static/Web/VelaSans-Medium.woff) format("woff");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "VelaSans";
+  src: url(../assets/fonts/VelaSans/Static/Web/VelaSans-Bold.woff2)
+      format("woff2"),
+    url(../assets/fonts/VelaSans/Static/Web/VelaSans-Bold.woff) format("woff");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "VelaSans";
+  src: url(../assets/fonts/VelaSans/Static/Web/VelaSans-ExtraBold.woff2)
+      format("woff2"),
+    url(../assets/fonts/VelaSans/Static/Web/VelaSans-ExtraBold.woff)
+      format("woff");
+  font-weight: 800;
+}
+@font-face {
+  font-family: "VelaSans";
+  src: url(../assets/fonts/VelaSans/Static/Web/VelaSans-SemiBold.woff2)
+      format("woff2"),
+    url(../assets/fonts/VelaSans/Static/Web/VelaSans-SemiBold.woff)
+      format("woff");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "VelaSans";
+  src: url(../assets/fonts/VelaSans/Static/Web/VelaSans-ExtraLight.woff2)
+      format("woff2"),
+    url(../assets/fonts/VelaSans/Static/Web/VelaSans-ExtraLight.woff)
+      format("woff");
+  font-weight: 200;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+:root {
+  /* Typography */
+
+  --font-main: "VelaSans";
+  --font-secondary: "Inter";
+  --font-10: 10px;
+  --font-12: 12px;
+  --font-14: 14px;
+  --font-16: 16px;
+  --font-18: 18px;
+  --font-20: 20px;
+  --font-24: 24px;
+  --font-32: 32px;
+  --font-40: 40px;
+  --font-48: 48px;
+  --font-52: 52px;
+
+  --weight-light-x: 200;
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold-semi: 600;
+  --weight-bold: 700;
+  --weight-bold-x: 800;
+
+  --line-height-14: 14px;
+  --line-height-20: 20px;
+  --line-height-22: 22px;
+  --line-height-26: 26px;
+  --line-height-32: 32px;
+  --line-height-36: 36px;
+  --line-height-65: 65px;
+
+  /* Colors */
+  --white: #ffffff;
+  --black: #000000;
+  --green: #769d22;
+  --grey: #807f7e;
+  --light-black: #222222;
+  --whitish: #fffdfb;
+  --beige: #e8e9da;
+  --error: #cc0000;
+
+  /* spaces */
+  --padding-102: 102px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:before,
+*,
+:after {
+  outline: none;
+  text-decoration: none;
+  border: none;
+  box-sizing: border-box;
+  text-decoration-line: none;
+}
+
+body {
+  overflow: hidden;
+  background-color: var(--whitish);
+  font-family: var(--font-main);
+  position: relative;
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.font-heading-24 {
+  font-family: var(--font-main);
+  font-size: var(--font-24);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-28);
+  color: var(--light-black);
+}
+
+.font-btn-light-24 {
+  font-family: var(--font-main);
+  font-size: var(--font-24);
+  font-weight: var(--weight-light);
+  line-height: var(--line-height-32);
+  color: var(--light-black);
+}
+
+.font-body-1 {
+  font-family: var(--font-main);
+  font-size: var(--font-16);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-26);
+  color: var(--light-black);
+}
+
+.font-body-light-1 {
+  font-family: var(--font-main);
+  font-size: var(--font-16);
+  font-weight: var(--weight-light);
+  line-height: var(--line-height-26);
+  color: var(--light-black);
+}
+
+.font-heading-bold-16 {
+  font-family: var(--font-main);
+  font-size: var(--font-16);
+  font-weight: var(--weight-bold-x);
+  line-height: var(--line-height-20);
+  color: var(--light-black);
+}
+
+.font-body-2 {
+  font-family: var(--font-main);
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-22);
+  color: var(--light-black);
+}
+
+.font-body-light-2 {
+  font-family: var(--font-main);
+  font-size: var(--font-14);
+  font-weight: var(--weight-light);
+  line-height: var(--line-height-22);
+  color: var(--light-black);
+  text-transform: none;
+}
+
+.font-body-3 {
+  font-family: var(--font-main);
+  font-size: var(--font-12);
+  font-weight: var(--weight-light-x);
+  line-height: var(--line-height-16);
+  color: var(--light-black);
+}
+
+.font-body-4 {
+  font-family: var(--font-main);
+  font-size: var(--font-10);
+  font-weight: var(--weight-light);
+  color: var(--light-black);
+}
+
+.font-body-3-bold {
+  font-family: var(--font-main);
+  font-size: var(--font-12);
+  font-weight: var(--weight-bold-x);
+  line-height: var(--line-height-16);
+  color: var(--light-black);
+}
+
+.font-heading-reg-52 {
+  font-family: var(--font-main);
+  font-size: var(--font-52);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-65);
+  color: var(--light-black);
+}
+
+.font-heading-bold-52 {
+  font-family: var(--font-main);
+  font-size: var(--font-52);
+  font-weight: var(--weight-bold);
+  line-height: var(--line-height-65);
+  color: var(--light-black);
+}
+
+.font-heading-48 {
+  font-family: var(--font-main);
+  font-size: var(--font-48);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-65);
+  color: var(--light-black);
+}
+
+.font-heading-reg-32 {
+  font-family: var(--font-main);
+  font-size: var(--font-32);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-36);
+  color: var(--light-black);
+}
+
+.font-heading-bold-32 {
+  font-family: var(--font-main);
+  font-size: var(--font-32);
+  font-weight: var(--weight-bold-x);
+  color: var(--light-black);
+}
+
+.text-color-accent {
+  color: var(--green);
+}

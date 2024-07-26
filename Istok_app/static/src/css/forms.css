@@ -1,0 +1,154 @@
+.input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 17px;
+  gap: 10px;
+  width: 100%;
+  max-width: 486px;
+  height: 44px;
+  font-family: var(--font-main);
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-22);
+  color: var(--light-black);
+  border: 1px solid var(--grey);
+}
+
+.input::placeholder {
+  color: var(--grey);
+  font-family: var(--font-main);
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-22);
+}
+
+.radio__label {
+  position: relative;
+  padding-left: 22px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.radio__label:before {
+  content: " ";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--light-black);
+  border-radius: 50%;
+  background: var(--whitish);
+}
+
+.radio__label:has(input[type="radio"]:checked):after {
+  content: " ";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--light-black);
+}
+
+.hidden__input {
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.flatpickr-calendar {
+  background-color: var(--whitish) !important;
+  border-radius: 0;
+  opacity: 1 !important;
+  z-index: 30000;
+}
+
+.flatpickr-calendar > * {
+  background-color: var(--whitish) !important;
+  opacity: 1 !important;
+}
+
+.flatpickr-day {
+  cursor: pointer;
+  font-family: var(--main);
+  font-weight: var(--weight-regular);
+  color: var(--grey);
+  font-size: 10px;
+  border-radius: 0;
+  height: 24px;
+  line-height: 24px;
+  opacity: 1 !important;
+}
+.flatpickr-day.today {
+  background-color: var(--beige);
+  border-radius: 2px;
+  color: var(--light-black);
+  outline: 1px solid var(--green);
+}
+.flatpickr-day.selected {
+  background-color: var(--green);
+  color: var(--whitish) !important;
+  border-radius: 2px;
+}
+.flatpickr-weekday {
+  box-sizing: border-box;
+  font-size: 10px;
+  color: var(--light-black);
+  opacity: 1;
+  height: 24px;
+  width: 24px;
+  line-height: 2 !important;
+}
+
+.flatpickr-day.weekday {
+  color: var(--grey);
+  opacity: 1;
+}
+.flatpickr-day.weekend {
+  color: var(--green);
+}
+.flatpickr-day:hover {
+  background-color: var(--grey);
+  border-radius: 2px;
+  color: var(--whitish);
+}
+.flatpickr-weekdaycontainer .flatpickr-weekday {
+  font-family: var(--main);
+  font-weight: var(--weight-regular);
+  font-size: 10px;
+  color: var(--light-black);
+}
+.flatpickr-month {
+  font-family: var(--main);
+  font-weight: var(--weight-regular);
+  background-color: black;
+  font-size: 11px;
+}
+
+.flatpickr-weekwrapper .flatpickr-weekday {
+  visibility: hidden;
+}
+
+.flatpickr-weekwrapper .flatpickr-weeks {
+  padding: 0 !important;
+}
+
+.flatpickr-weekwrapper .flatpickr-weeks .flatpickr-day {
+  background-color: var(--beige);
+  border-radius: 2px;
+  color: var(--light-black);
+  font-family: var(--main);
+  font-size: 10px;
+  font-weight: var(--weight-light-x);
+  width: 39px;
+  line-height: 39px;
+  border-radius: 5px;
+}
+

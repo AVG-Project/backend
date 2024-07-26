@@ -1,0 +1,243 @@
+
+
+.data-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 24px;
+  gap: 16px;
+  width: 100%;
+  max-width: 372px;
+  height: 100px;
+  border: 0.5px solid #e8e9da;
+}
+
+.data-item:has(.data-item__copy:active) {
+  outline: 2px solid var(--beige);
+}
+
+.data-item:has(.error_message:not(:empty)) {
+  border: 1px solid var(--error);
+}
+
+.data-item:has(.error_message:not(:empty)) > * {
+  color: var(--error)
+}
+
+.error_message {
+  position: absolute;
+  bottom: -20px;
+  left: -1px;
+  color: var(--error);
+  font-size: 12px;
+  font-weight: var(--weight-light-x);
+  line-height: 16px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+}
+
+.error_message:empty {
+  display: none;
+}
+
+.data-item__title {
+  width: 205px;
+  height: 16px;
+}
+
+.data-item__entry {
+  width: 100%;
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.data-item__edit, .data-item__copy {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  inset: calc(50% - 10px) 29px auto auto;
+  width: 20px;
+  height: 20px;
+  color: var(--light-black);
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.data-item__copy:hover .tooltip {
+  display: block;
+}
+
+.copy__icon {
+  width: 30px;
+  height: 30px;
+
+}
+
+.edit__icon {
+  width: 20px;
+  height: 20px;
+}
+
+
+.profile__password-mask {
+  color: var(--light-black);
+  letter-spacing: 4px;
+}
+
+
+/*  edit forms  */
+
+.profile__modal-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: flex-end;
+  width: 480px;
+  height: 464px;
+  background-color: var(--whitish);
+  border-radius: 10px;
+  padding: 68px 84px;
+  gap: 12px;
+}
+
+.profile__save-btn {
+  margin-top: auto;
+}
+
+.profile__input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 9px 24px 13px;
+  gap: 4px;
+  width: 100%;
+  max-width: 312px;
+  height: 100%;
+  height: 68px;
+  border: 0.5px solid #e8e9da;
+}
+
+.edit-phone-title {
+  margin-bottom: 4px;
+}
+
+.profile__modal-label {
+  position: relative;
+}
+
+.toggle-password {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  right: 24px;
+  top: 30px;
+  width: 20px;
+  height: 20px;
+}
+
+/* date picker  */
+
+
+.flatpickr-calendar {
+  background-color: var(--whitish) !important;
+  border-radius: 0;
+  opacity: 1 !important;
+  z-index: 30000;
+}
+
+.flatpickr-calendar > * {
+  background-color: var(--whitish) !important;
+  opacity: 1 !important;
+}
+
+.flatpickr-day {
+  cursor: pointer;
+  font-family: var(--main);
+  font-weight: var(--weight-regular);
+  color: var(--grey);
+  font-size: 10px;
+  border-radius: 0;
+  height: 24px;
+  line-height: 24px;
+  opacity: 1 !important;
+}
+.flatpickr-day.today {
+  background-color: var(--beige);
+  border-radius: 2px;
+  color: var(--light-black);
+  outline: 1px solid var(--green);
+}
+.flatpickr-day.selected {
+  background-color: var(--green);
+  color: var(--whitish) !important;
+  border-radius: 2px;
+}
+.flatpickr-weekday {
+  box-sizing: border-box;
+  font-size: 10px;
+  color: var(--light-black);
+  opacity: 1;
+  height: 24px;
+  width: 24px;
+  line-height: 2 !important;
+}
+
+.flatpickr-day.weekday {
+  color: var(--grey);
+  opacity: 1;
+}
+.flatpickr-day.weekend {
+  color: var(--green);
+}
+.flatpickr-day:hover {
+  background-color: var(--grey);
+  border-radius: 2px;
+  color: var(--whitish);
+}
+.flatpickr-weekdaycontainer .flatpickr-weekday {
+  font-family: var(--main);
+  font-weight: var(--weight-regular);
+  font-size: 10px;
+  color: var(--light-black);
+}
+.flatpickr-month {
+  font-family: var(--main);
+  font-weight: var(--weight-regular);
+  background-color: black;
+  font-size: 11px;
+}
+
+
+.flatpickr-weekwrapper .flatpickr-weeks {
+  padding: 0 !important;
+}
+
+.flatpickr-weekwrapper .flatpickr-weeks .flatpickr-day {
+  background-color: var(--beige);
+  border-radius: 2px;
+  color: var(--light-black);
+  font-family: var(--main);
+  font-size: 10px;
+  font-weight: var(--weight-light-x);
+  width: 39px;
+  line-height: 39px;
+  border-radius: 5px;
+}

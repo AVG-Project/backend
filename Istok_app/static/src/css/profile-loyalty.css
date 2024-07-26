@@ -1,0 +1,164 @@
+.loyalty__content-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.loyalty__sub-heading {
+  font-family: var(--font-main);
+  font-size: var(--font-20);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-26);
+  color: var(--light-black);
+  margin-bottom: 20px;
+}
+
+.loyalty__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile__group-title {
+  margin-bottom: 12px;
+}
+
+.hidden__input {
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.radio__label_profile {
+  position: relative;
+  padding-left: 22px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.radio__label_profile:before {
+  content: " ";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--light-black);
+  border-radius: 50%;
+  background: var(--whitish);
+}
+
+.radio__label_profile:has(input[type="radio"]:checked):after {
+  content: " ";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--light-black);
+}
+
+.loyalty__submit-btn {
+  margin-top: 48px;
+}
+
+.loyalty__top-card {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 32px;
+}
+
+.loyalty__section {
+  display: flex;
+  flex-flow: column nowrap;
+
+  gap: 20px;
+
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 180px;
+  height: 100px;
+  background: #e8e9da;
+  border-radius: 2px;
+}
+
+.loyalty__logo {
+  width: 116px;
+  height: 24px;
+}
+
+.bonus-count {
+font-family: var(--font-main);
+font-weight: var(--weight-medium);
+font-size: var(--font-18);
+color: var(--light-black);
+}
+
+.top-card__name {
+  margin-bottom: 16px;
+}
+
+.top-card__links {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 8px;
+}
+
+.top-card__qr {
+width: 100px;
+height: 100px;
+}
+
+.top-card__text-block {
+  display: flex;
+  flex-flow: column wrap;
+  line-break: loose;
+  max-width: 246px;
+}
+
+.copy-link-btn {
+  all: unset;
+  cursor: pointer;
+  color: var(--green);
+}
+
+.loyalty__benefits {
+  display: flex;
+  flex-flow: column wrap;
+  gap: 12px;
+}
+
+.loyalty__benefit {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 12px;
+gap: 8px;
+width: 385px;
+border: 1px solid #E8E9DA;
+
+}
+
+.loyalty__benefit-text {
+  display: flex;
+  flex-flow: row wrap;
+  line-break: loose;
+}
+
+.loyalty__footnote {
+margin-left: auto;
+}

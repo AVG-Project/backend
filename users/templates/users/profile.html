@@ -1,0 +1,884 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Istok - Profile</title>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{% static 'favicon_io/apple-touch-icon.png' %}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'favicon_io/favicon-32x32.png' %}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{% static 'favicon_io/favicon-16x16.png' %}"
+    />
+    <link rel="manifest" href="{% static 'favicon_io/site.webmanifest' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/reset.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/global.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/buttons.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/modal.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/base-elements.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/profile-personal-data.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/profile-base-elements.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  </head>
+  <body class="profile__body">
+    <header class="header">
+      <a href="{% url 'home' %}">
+        <svg alt="logo" class="header__logo">
+          <use
+            href="{% static './src/assets/images/interface/icons-sprite-sheet.svg' %}#logo"
+          ></use>
+        </svg>
+      </a>
+      <nav class="header__nav">
+        <ul class="header__links">
+          <li>
+            <a class="header__link font-body-1" href="{% url 'home' %}"
+              >Главная</a
+            >
+          </li>
+          <li class="header__link font-body-1">
+            <a class="header__link font-body-1" href="{% url 'finished_furniture_list' %}"
+              >Готовая мебель</a
+            >
+          </li>
+          <li class="header__link font-body-1">
+            <a class="header__link font-body-1" href="{% url 'about' %}"
+            >О нас</a>
+          </li>
+          <li class="header__link font-body-1">
+            <a
+              class="header__link font-body-1"
+              href="{% url 'application_create' %}"
+              >Оставить заявку</a
+            >
+          </li>
+            <li class="header__link font-body-1">
+              <a
+                class="header__link font-body-1 header__sign-in active"
+                href="{% url 'profile' %}"
+                >Личный кабинет</a
+              >
+            </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="profile__main">
+      <div class="profile__nav">
+        <div class="profile__nav-container">
+          <ul class="profile__nav-links">
+            <li>
+              <a href="{% url 'orders_list' %}" class="font-body-1 profile__navlink"
+                >Мои заказы</a
+              >
+            </li>
+            <li>
+              <a href="{% url 'loyalty_start' %}" class="font-body-1 profile__navlink"
+                >Программа лояльности</a
+              >
+            </li>
+            <li>
+              <a href="{% url 'orders_list_completed' %}" class="font-body-1 profile__navlink"
+                >История заказов</a
+              >
+            </li>
+            <li>
+              <a
+                href="{% url 'profile' %}"
+                class="font-body-1 profile__navlink profile__navlink_active"
+                >Личные данные</a
+              >
+            </li>
+            <li>
+              <a href="#" class="font-body-1 profile__navlink"
+                >Поддержка</a
+              >
+            </li>
+          </ul>
+          <a href="{% url 'logout' %}" class="font-body-1 profile__navlink profile__navlink_exit"
+          >Выйти из аккаунта</a
+        >
+        </div>
+      </div>
+
+      <section class="profile__main-content">
+        <h1 class="profile__title">Личные данные</h1>
+        <div class="profile__content-wrapper">
+          <section class="data-item">
+            <h3 class="data-item__title font-body-3">ФИО</h3>
+            <p class="data-item__entry font-body-1">{{ fio }}</p>
+            <button
+              class="data-item__edit"
+              id="id_edit_full_name"
+              data-modal="modal_edit_name"
+            >
+              <svg class="edit__icon">
+                <use
+                  href="{% static 'src/assets/images/interface/icons-sprite-sheet.svg' %}#edit"
+                ></use>
+              </svg>
+            </button>
+
+{#            todo послылать ошибки чрезе свою функцию. Макс 1 ошибка на поле. Или организовать #}
+{#          вывод большого количества ошибок на фронту #}
+            {% if form_first_last_name.errors %}
+              {% for field in form_first_last_name %}
+                {% for error in field.errors %}
+                  <div class="error_message">{{ error }}</div>
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
+            {% if form_surname.errors %}
+              {% for field in form %}
+                {% for error in field.errors %}
+                  <div class="error_message">{{ error }}</div>
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
+
+          </section>
+
+          <section class="data-item">
+            <h3 class="data-item__title font-body-3">Дата рождения</h3>
+            <p class="data-item__entry font-body-1">{{ profile.birth_date|date:"d.m.Y" }}</p>
+            <button
+              class="data-item__edit"
+              id="id_edit_birth_date"
+              data-modal="modal_edit_birth_date"
+            >
+              <svg class="edit__icon">
+                <use
+                  href="{% static 'src/assets/images/interface/icons-sprite-sheet.svg' %}#edit"
+                ></use>
+              </svg>
+            </button>
+            {% if form_birth_day.errors %}
+              {% for field in form_birth_day %}
+                {% for error in field.errors %}
+                  <div class="error_message">{{ error }}</div>
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
+          </section>
+
+          <section class="data-item">
+            <h3 class="data-item__title font-body-3">Номер телефона</h3>
+            <p class="data-item__entry font-body-1">{{ mobile_number }}</p>
+            <button
+              class="data-item__edit"
+              id="id_edit_phone_nr"
+              data-modal="modal_edit_phone"
+            >
+              <svg class="edit__icon">
+                <use
+                  href="{% static 'src/assets/images/interface/icons-sprite-sheet.svg' %}#edit"
+                ></use>
+              </svg>
+            </button>
+            {% if form_mobile_number.errors %}
+              {% for field in form_mobile_number %}
+                {% for error in field.errors %}
+                  <div class="error_message">{{ error }}</div>
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
+          </section>
+
+          <section class="data-item">
+            <h3 class="data-item__title font-body-3">Email</h3>
+            <p class="data-item__entry font-body-1">{{ user.email }}</p>
+            <button
+              class="data-item__edit"
+              id="id_edit_email"
+              data-modal="modal_edit_email"
+            >
+              <svg class="edit__icon">
+                <use
+                  href="{% static 'src/assets/images/interface/icons-sprite-sheet.svg' %}#edit"
+                ></use>
+              </svg>
+            </button>
+            {% if form_email.errors %}
+              {% for field in form_email %}
+                {% for error in field.errors %}
+                  <div class="error_message">{{ error }}</div>
+                {% endfor %}
+              {% endfor %}
+            {% endif %}
+          </section>
+
+          <section class="data-item">
+            <h3 class="data-item__title font-body-3">Пароль</h3>
+            <p class="data-item__entry font-body-1 profile__password-mask">
+              superpassword
+            </p>
+            <button
+              class="data-item__edit"
+              id="id_edit_password"
+              data-modal="modal_edit_password"
+            >
+              <svg class="edit__icon">
+                <use
+                  href="{% static 'src/assets/images/interface/icons-sprite-sheet.svg' %}#edit"
+                ></use>
+              </svg>
+            </button>
+            {% if form_password.errors %}
+{#              {% for field in form_password %}#}
+{#                {% for error in field.errors %}#}
+{#                  <div class="error_message">{{ error }}</div>#}
+{#                {% endfor %}#}
+{#              {% endfor %}#}
+              {% if form_password.old_password.errors %}
+                <div class="error_message">{{ form_password.old_password.errors }}</div>
+              {% elif form_password.new_password1.errors %}
+                <div class="error_message">{{ form_password.new_password1.errors }}</div>
+              {% elif form_password.new_password2.errors %}
+                <div class="error_message">{{ form_password.new_password2.errors }}</div>
+              {% endif %}
+            {% endif %}
+          </section>
+
+{#        #}
+            {% if user_loyalty %}
+              <section class="data-item">
+                <h3 class="data-item__title font-body-3">Код лояльности</h3>
+                <p class="data-item__entry font-body-1" id="id_referral_code">SADS11</p>
+                <button
+                  class="data-item__copy"
+                  id="id_copy_code"
+                >
+                <svg class="copy__icon">
+                  <use
+                    href="{% static 'src/assets/images/interface/icons-sprite-sheet.svg' %}#copy"
+                  ></use>
+                </svg>
+                <span class="tooltip">Скопировать код</span>
+                </button>
+              </section>
+            {% else %}
+              <section class="data-item">
+                <h3 class="data-item__title font-body-3">Код лояльности</h3>
+{#                todo вставить сслыку на код лояльности #}
+                <a href="#" class="data-item__entry font-body-1" id="id_referral_code">Получить код</a>
+              </section>
+            {% endif %}
+{##}
+        </div>
+      </section>
+
+      <!-- modal form to edit full name -->
+
+      <div class="modal profile__modal" id="modal_edit_name">
+        <div class="profile__modal-content">
+          <form
+            class="profile__modal-form"
+            id="id_edit_full_name_form"
+            action=""
+            method="post"
+            name="id_edit_full_name_form"
+          >
+            {% csrf_token %}
+            <button
+              class="modal__close"
+              data-modal="modal_edit_name"
+              data-close-modal="modal_edit_name"
+              id="modal_edit_name_close"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewbox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.209396 0.210303C-0.0697984 0.490706 -0.0697989 0.94533 0.209396 1.22573L6.01138 7.05284L0.314625 12.7743C0.0354299 13.0547 0.0354297 13.5093 0.314624 13.7897C0.593819 14.0701 1.04648 14.0701 1.32568 13.7897L7.02243 8.06827L12.6791 13.7494C12.9582 14.0298 13.4109 14.0298 13.6901 13.7494C13.9693 13.469 13.9693 13.0144 13.6901 12.734L8.03349 7.05284L13.7953 1.26604C14.0745 0.985641 14.0745 0.531016 13.7953 0.250613C13.5161 -0.029791 13.0635 -0.0297915 12.7843 0.250612L7.02243 6.03741L1.22045 0.210303C0.941255 -0.0701008 0.488591 -0.070101 0.209396 0.210303Z"
+                  fill="#222222"
+                ></path>
+              </svg>
+            </button>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_last_name"
+              >Фамилия
+              <input
+                class="profile__modal-input font-body-1"
+                type="text"
+                id="id_last_name"
+                name="last_name"
+                value="{{ form_first_last_name.last_name.value }}"
+            /></label>
+            <label
+              class="profile__input-wrapper font-body-3"
+              for="id_first_name"
+              >Имя
+              <input
+                class="profile__modal-input font-body-1"
+                type="text"
+                id="id_first_name"
+                name="first_name"
+                value="{{ form_first_last_name.first_name.value }}"
+            /></label>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_surname"
+              >Отчество
+              <input
+                class="profile__modal-input font-body-1"
+                type="text"
+                id="id_surname"
+                name="surname"
+                value="{{ form_surname.surname.value }}"
+            /></label>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_surname"
+            ></label>
+            <button
+              class="button_mid profile__save-btn button"
+              data-close-modal="modal_edit_name"
+            >
+              Сохранить
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- modal form to edit phone number-->
+
+      <div class="modal profile__modal" id="modal_edit_phone">
+        <div class="profile__modal-content">
+          <form
+            class="profile__modal-form"
+            id="id_edit_phone_nr_form"
+            action=""
+            method="post"
+            name="id_edit_phone_form"
+          >
+            {% csrf_token %}
+            <button
+              class="modal__close"
+              data-modal="modal_edit_phone"
+              data-close-modal="modal_edit_phone"
+              id="modal_edit_phone_close"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewbox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.209396 0.210303C-0.0697984 0.490706 -0.0697989 0.94533 0.209396 1.22573L6.01138 7.05284L0.314625 12.7743C0.0354299 13.0547 0.0354297 13.5093 0.314624 13.7897C0.593819 14.0701 1.04648 14.0701 1.32568 13.7897L7.02243 8.06827L12.6791 13.7494C12.9582 14.0298 13.4109 14.0298 13.6901 13.7494C13.9693 13.469 13.9693 13.0144 13.6901 12.734L8.03349 7.05284L13.7953 1.26604C14.0745 0.985641 14.0745 0.531016 13.7953 0.250613C13.5161 -0.029791 13.0635 -0.0297915 12.7843 0.250612L7.02243 6.03741L1.22045 0.210303C0.941255 -0.0701008 0.488591 -0.070101 0.209396 0.210303Z"
+                  fill="#222222"
+                ></path>
+              </svg>
+            </button>
+            <h3 class="font-body-1 edit-phone-title">
+              Введите новый номер телефона
+            </h3>
+            <p class="font-body-3">
+              Введите новый номер телефона, который будет привязан к вашему
+              личному кабинету
+            </p>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_phone"
+              >Новый номер телефона
+              <input
+                class="profile__modal-input font-body-1"
+                type="text"
+                required=""
+                id="id_username"
+                pattern="^\+?[0-9]{11,12}$"
+                title="Телефон должен быть указан в формате: '+7XXXXXXXXXX'. Максимум 12 цифр."
+                name="username"
+                value="{{ form_mobile_number.username.value }}"
+            /></label>
+
+            <button
+              class="button_mid profile__save-btn button"
+              data-close-modal="modal_edit_phone"
+            >
+              Сохранить
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- modal form to edit email  -->
+
+      <div class="modal profile__modal" id="modal_edit_email">
+        <div class="profile__modal-content">
+          <form
+            class="profile__modal-form"
+            id="id_edit_email_form"
+            action=""
+            method="post"
+            name="id_edit_email_form"
+          >
+            {% csrf_token %}
+            <button
+              class="modal__close"
+              data-modal="modal_edit_email"
+              data-close-modal="modal_edit_email"
+              id="modal_edit_email_close"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewbox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.209396 0.210303C-0.0697984 0.490706 -0.0697989 0.94533 0.209396 1.22573L6.01138 7.05284L0.314625 12.7743C0.0354299 13.0547 0.0354297 13.5093 0.314624 13.7897C0.593819 14.0701 1.04648 14.0701 1.32568 13.7897L7.02243 8.06827L12.6791 13.7494C12.9582 14.0298 13.4109 14.0298 13.6901 13.7494C13.9693 13.469 13.9693 13.0144 13.6901 12.734L8.03349 7.05284L13.7953 1.26604C14.0745 0.985641 14.0745 0.531016 13.7953 0.250613C13.5161 -0.029791 13.0635 -0.0297915 12.7843 0.250612L7.02243 6.03741L1.22045 0.210303C0.941255 -0.0701008 0.488591 -0.070101 0.209396 0.210303Z"
+                  fill="#222222"
+                ></path>
+              </svg>
+            </button>
+            <h3 class="font-body-1 edit-phone-title">Введите новый email</h3>
+            <p class="font-body-3">
+              Введите новый email, который будет привязан к вашему личному
+              кабинету
+            </p>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_email"
+              >Новый email
+              <input
+                class="profile__modal-input font-body-1"
+                type="email"
+                id="id_email"
+                name="email"
+                value="{{ form_email.email.value }}"
+            /></label>
+            <button
+              class="button_mid profile__save-btn button"
+              data-close-modal="modal_edit_email"
+            >
+              Сохранить
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- modal form to edit birthdate  -->
+
+      <div class="modal profile__modal" id="modal_edit_birth_date">
+        <div class="profile__modal-content">
+          <form
+            class="profile__modal-form"
+            id="birth_date"
+            action=""
+            method="post"
+            name="birth_date"
+          >
+            {% csrf_token %}
+            <button
+              class="modal__close"
+              data-modal="modal_edit_birth_date"
+              data-close-modal="modal_edit_birth_date"
+              id="modal_edit_birth_date_close"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewbox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.209396 0.210303C-0.0697984 0.490706 -0.0697989 0.94533 0.209396 1.22573L6.01138 7.05284L0.314625 12.7743C0.0354299 13.0547 0.0354297 13.5093 0.314624 13.7897C0.593819 14.0701 1.04648 14.0701 1.32568 13.7897L7.02243 8.06827L12.6791 13.7494C12.9582 14.0298 13.4109 14.0298 13.6901 13.7494C13.9693 13.469 13.9693 13.0144 13.6901 12.734L8.03349 7.05284L13.7953 1.26604C14.0745 0.985641 14.0745 0.531016 13.7953 0.250613C13.5161 -0.029791 13.0635 -0.0297915 12.7843 0.250612L7.02243 6.03741L1.22045 0.210303C0.941255 -0.0701008 0.488591 -0.070101 0.209396 0.210303Z"
+                  fill="#222222"
+                ></path>
+              </svg>
+            </button>
+            <h3 class="font-body-1 edit-phone-title">
+              Измените дату рождения
+            </h3>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_birth_date_day"
+              >Дата рождения
+              <input
+                class="profile__modal-input font-body-1"
+                type="text"
+                id="id_birth_date"
+                name="birth_date"
+                value="{{ form_birth_day.birth_date.value|date:"d.m.Y" }}"
+                placeholder="ДД.ММ.ГГ"
+            /></label>
+            <button
+              class="button_mid profile__save-btn button"
+              data-close-modal="modal_edit_birth_date"
+            >
+              Сохранить
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- modal to edit password -->
+
+      <div class="modal profile__modal" id="modal_edit_password">
+        <div class="profile__modal-content">
+          <form
+            class="profile__modal-form"
+            id="id_edit_password_form"
+            action=""
+            method="post"
+            name="id_edit_password_form"
+          >
+            {% csrf_token %}
+            <button
+              class="modal__close"
+              data-modal="modal_edit_password"
+              data-close-modal="modal_edit_password"
+              id="modal_edit_password_close"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M0.209396 0.210303C-0.0697984 0.490706 -0.0697989 0.94533 0.209396 1.22573L6.01138 7.05284L0.314625 12.7743C0.0354299 13.0547 0.0354297 13.5093 0.314624 13.7897C0.593819 14.0701 1.04648 14.0701 1.32568 13.7897L7.02243 8.06827L12.6791 13.7494C12.9582 14.0298 13.4109 14.0298 13.6901 13.7494C13.9693 13.469 13.9693 13.0144 13.6901 12.734L8.03349 7.05284L13.7953 1.26604C14.0745 0.985641 14.0745 0.531016 13.7953 0.250613C13.5161 -0.029791 13.0635 -0.0297915 12.7843 0.250612L7.02243 6.03741L1.22045 0.210303C0.941255 -0.0701008 0.488591 -0.070101 0.209396 0.210303Z"
+                  fill="#222222"
+                ></path>
+              </svg>
+            </button>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_old_password"
+              >Введите старый пароль
+              <input
+                class="profile__modal-input font-body-1"
+                type="password"
+                id="id_old_password"
+                name="old_password"
+                value=""
+                required
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                onclick="togglePasswordVisibility('id_old_password')"
+              >
+              <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.44113 1L19.5585 17M15.8141 13.7559C14.367 14.4845 12.7315 14.9999 10.9998 14.9999C7.22261 14.9999 3.9029 12.5478 1.9992 10.7788C1.49669 10.3119 1.24548 10.0784 1.08555 9.62012C0.9715 9.29328 0.971464 8.70657 1.08555 8.37974C1.24553 7.92147 1.49726 7.68745 2.00077 7.21967C2.96029 6.32821 4.27924 5.26359 5.83498 4.42676M19.0236 11.6335C19.3799 11.3405 19.7062 11.0523 19.9991 10.7803L20.0022 10.7772C20.5035 10.3114 20.7549 10.0779 20.9145 9.62061C21.0286 9.29378 21.0284 8.70684 20.9143 8.38C20.7545 7.92187 20.5029 7.68775 20.0008 7.22111C18.0971 5.45208 14.7771 3 10.9998 3C10.6388 3 10.2819 3.02241 9.92999 3.06448M12.4151 10.5C12.0379 10.8112 11.5425 11 10.9998 11C9.81812 11 8.86015 10.1046 8.86015 9C8.86015 8.4605 9.08869 7.97108 9.4602 7.61133" stroke="#222222" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                
+              </button>
+            </label>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_new_password1"
+              >Введите новый пароль
+              <input
+                class="profile__modal-input font-body-1"
+                type="password"
+                id="id_new_password1"
+                name="new_password"
+                value=""
+                required
+              />
+              <button
+              type="button"
+              class="toggle-password"
+              onclick="togglePasswordVisibility('id_new_password1')"
+            >
+            <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.44113 1L19.5585 17M15.8141 13.7559C14.367 14.4845 12.7315 14.9999 10.9998 14.9999C7.22261 14.9999 3.9029 12.5478 1.9992 10.7788C1.49669 10.3119 1.24548 10.0784 1.08555 9.62012C0.9715 9.29328 0.971464 8.70657 1.08555 8.37974C1.24553 7.92147 1.49726 7.68745 2.00077 7.21967C2.96029 6.32821 4.27924 5.26359 5.83498 4.42676M19.0236 11.6335C19.3799 11.3405 19.7062 11.0523 19.9991 10.7803L20.0022 10.7772C20.5035 10.3114 20.7549 10.0779 20.9145 9.62061C21.0286 9.29378 21.0284 8.70684 20.9143 8.38C20.7545 7.92187 20.5029 7.68775 20.0008 7.22111C18.0971 5.45208 14.7771 3 10.9998 3C10.6388 3 10.2819 3.02241 9.92999 3.06448M12.4151 10.5C12.0379 10.8112 11.5425 11 10.9998 11C9.81812 11 8.86015 10.1046 8.86015 9C8.86015 8.4605 9.08869 7.97108 9.4602 7.61133" stroke="#222222" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              
+            </button>
+            </label>
+            <p class="font-body-3">Минимальная длина пароля – 8 символов.</p>
+            <label
+              class="profile__modal-label font-body-3 profile__input-wrapper"
+              for="id_new_password2"
+              >Повторите новый пароль
+              <input
+                class="profile__modal-input font-body-1"
+                type="password"
+                id="id_new_password2"
+                name="new_password"
+                required
+              />
+              <button
+              type="button"
+              class="toggle-password"
+              onclick="togglePasswordVisibility('id_new_password2')"
+            >
+            <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.44113 1L19.5585 17M15.8141 13.7559C14.367 14.4845 12.7315 14.9999 10.9998 14.9999C7.22261 14.9999 3.9029 12.5478 1.9992 10.7788C1.49669 10.3119 1.24548 10.0784 1.08555 9.62012C0.9715 9.29328 0.971464 8.70657 1.08555 8.37974C1.24553 7.92147 1.49726 7.68745 2.00077 7.21967C2.96029 6.32821 4.27924 5.26359 5.83498 4.42676M19.0236 11.6335C19.3799 11.3405 19.7062 11.0523 19.9991 10.7803L20.0022 10.7772C20.5035 10.3114 20.7549 10.0779 20.9145 9.62061C21.0286 9.29378 21.0284 8.70684 20.9143 8.38C20.7545 7.92187 20.5029 7.68775 20.0008 7.22111C18.0971 5.45208 14.7771 3 10.9998 3C10.6388 3 10.2819 3.02241 9.92999 3.06448M12.4151 10.5C12.0379 10.8112 11.5425 11 10.9998 11C9.81812 11 8.86015 10.1046 8.86015 9C8.86015 8.4605 9.08869 7.97108 9.4602 7.61133" stroke="#222222" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              
+            </button>
+            </label>
+            <button
+              class="button_mid profile__save-btn button"
+              data-close-modal="modal_edit_password"
+            >
+              Сохранить
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- side menu -->
+
+    <div class="side-menu-contact">
+      <label class="side-menu-contact__button"
+        ><svg
+          class="side-menu-contact__pointer"
+          width="32"
+          height="32"
+          viewbox="0 0 32 32"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M11.2003 24L19.5002 16L11.2002 8.012L11.2002 4.79922L22.4002 15.9992L11.2002 27.1992L11.2003 24Z"
+            fill="white"
+          ></path>
+        </svg>
+        <span class="side-menu-contact__button-text">Связаться с ИСТОК</span>
+        <input class="side-menu-contact__hidden-input" type="checkbox"
+      /></label>
+      <div class="side-menu-contact__links">
+        <a
+          class="side-menu-contact__link"
+          href="https://wa.me/79311213900?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D1%81%D0%B2%D1%8F%D0%B7%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D1%81%D0%BE%20%D1%81%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%81%D1%82%D0%BE%D0%BC%21"
+          target="_blank"
+          aria-label="Чат whatsapp"
+          ><svg
+            width="33"
+            height="32"
+            viewbox="0 0 33 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_884_1719)">
+              <path
+                d="M16.5337 9.28808e-06C25.3511 9.28808e-06 32.5182 7.21145 32.5089 16.0408C32.4997 24.8701 25.2893 32.0314 16.4564 32C7.6235 31.9687 0.46878 24.7603 0.508957 15.9937C0.539863 7.1268 7.6884 -0.00939694 16.5337 9.28808e-06ZM16.5337 30.2661C24.3931 30.2661 30.7967 23.8981 30.8122 16.047C30.8122 8.14895 24.4549 1.75271 16.5461 1.7339C8.63722 1.71509 2.22112 8.11759 2.22112 15.9969C2.22112 23.8762 8.59392 30.2567 16.5151 30.2661H16.5337Z"
+                fill="#FFFDFB"
+              ></path>
+              <path
+                d="M16.5156 30.2667C8.59445 30.2667 2.20622 23.8892 2.20313 15.9974C2.20004 8.10557 8.63464 1.7156 16.528 1.73442C24.4214 1.75323 30.8097 8.14946 30.7942 16.0476C30.7787 23.8986 24.375 30.2761 16.5156 30.2667ZM7.82799 24.8581C9.3022 24.3815 10.6095 23.9676 11.923 23.5224C12.2892 23.4076 12.6832 23.4242 13.0387 23.5694C14.0741 23.883 15.1311 24.2874 16.1973 24.3595C18.0683 24.4623 19.9203 23.9347 21.465 22.8589C23.0098 21.7831 24.1607 20.2194 24.7386 18.4111C25.3164 16.6029 25.2889 14.6516 24.6602 12.8609C24.0315 11.0702 22.8369 9.54057 21.2624 8.51008C19.6879 7.47959 17.8218 7.00604 15.9545 7.16314C14.0872 7.32024 12.3235 8.09916 10.9378 9.37869C9.55211 10.6582 8.62225 12.3666 8.2929 14.2379C7.96355 16.1092 8.25321 18.0384 9.11678 19.7254C9.22189 19.9233 9.28048 20.1431 9.28799 20.3677C9.29549 20.5924 9.25172 20.8157 9.16005 21.0203C8.70574 22.2306 8.30703 23.4628 7.82799 24.8581Z"
+                fill="none"
+              ></path>
+              <path
+                d="M7.82812 24.8573C8.30717 23.4621 8.70587 22.2298 9.1571 21.0196C9.24876 20.8149 9.29253 20.5916 9.28503 20.367C9.27752 20.1423 9.21893 19.9225 9.11382 19.7246C8.24589 18.0344 7.95332 16.1004 8.28168 14.2239C8.61003 12.3474 9.54086 10.6338 10.9292 9.34991C12.3176 8.06602 14.0855 7.28398 15.9576 7.1256C17.8297 6.96721 19.7008 7.44136 21.2796 8.47421C22.8584 9.50706 24.0562 11.0406 24.6864 12.836C25.3166 14.6314 25.3438 16.5878 24.7638 18.4006C24.1839 20.2133 23.0293 21.7806 21.4799 22.8582C19.9304 23.9359 18.0732 24.4635 16.1975 24.3588C15.1312 24.2867 14.0742 23.8947 13.0389 23.5687C12.6833 23.4235 12.2894 23.4069 11.9232 23.5216C10.6189 23.9669 9.30234 24.3807 7.82812 24.8573Z"
+                fill="#FFFDFB"
+              ></path>
+              <path
+                d="M12.516 13.7989C12.5048 13.4873 12.5616 13.1771 12.6824 12.8904C12.8031 12.6036 12.9848 12.3475 13.2145 12.1403C13.7801 11.6198 14.4507 11.7609 14.7598 12.4538C14.868 12.7015 14.9576 12.9587 15.0689 13.2032C15.3285 13.7425 15.3779 14.2285 14.8773 14.6737C14.5682 14.9622 14.6176 15.3008 14.8556 15.63C15.4633 16.5088 16.2754 17.2217 17.2199 17.7057C17.6928 17.9314 18.0698 17.9063 18.3233 17.4235C18.6725 16.7588 19.133 16.7682 19.6924 17.1099C19.8717 17.2129 20.0564 17.3061 20.2456 17.389C21.1264 17.8311 21.1913 18.6776 20.3785 19.311C20.0927 19.5377 19.7577 19.6921 19.4014 19.7613C19.0451 19.8306 18.6776 19.8127 18.3295 19.7092C17.1136 19.3865 15.9961 18.7615 15.0781 17.8907C14.0702 16.9946 13.2612 15.8917 12.7046 14.6549C12.5937 14.3827 12.53 14.0931 12.516 13.7989Z"
+                fill="#222222"
+              ></path>
+            </g>
+            <defs>
+              <clippath id="clip0_884_1719">
+                <rect
+                  width="32"
+                  height="32"
+                  fill="white"
+                  transform="translate(0.5)"
+                ></rect>
+              </clippath>
+            </defs>
+          </svg>
+          <span class="side-menu-contact__link-text">Чат</span></a
+        >
+        <a
+          class="side-menu-contact__link"
+          href="https://t.me/ISTOKsupport_bot"
+          target="_blank"
+          aria-label="Телеграм бот"
+          ><svg
+            width="33"
+            height="32"
+            viewbox="0 0 33 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_884_1709)">
+              <path
+                d="M0.500025 16.0012C0.500025 7.15042 7.67844 0.00585938 16.517 0.00585938C25.2412 0.00585938 32.4784 7.21942 32.4969 15.7973C32.5217 24.8237 25.3865 32.0498 16.3161 32.0059C7.60737 31.9588 0.484568 24.7515 0.500025 16.0012ZM2.20653 16.0012C2.20653 23.842 8.59044 30.2683 16.449 30.2809C24.3076 30.2934 30.7811 23.9141 30.7873 16.1047C30.7886 14.2091 30.4202 12.3321 29.7032 10.5817C28.9862 8.83132 27.9349 7.24215 26.6099 5.90576C25.2849 4.56938 23.7123 3.5122 21.9827 2.79513C20.2531 2.07807 18.4008 1.71529 16.5325 1.72771C8.60899 1.71202 2.21581 8.09132 2.20653 16.0012Z"
+                fill="#FFFDFB"
+              ></path>
+              <path
+                d="M24.5023 10.8854C24.0478 13.7803 23.5995 16.6782 23.1358 19.5699C22.9689 20.6049 22.7803 21.6336 22.5763 22.6592C22.3104 23.9733 21.5252 24.3654 20.4122 23.6534C18.7088 22.5494 17.0425 21.3827 15.3824 20.2035C14.6713 19.7017 14.6466 19.2375 15.2865 18.6008C16.622 17.2616 17.9916 15.9537 19.3456 14.6333C19.604 14.3922 19.8457 14.1334 20.069 13.8587C20.1618 13.7395 20.1494 13.545 20.1835 13.3663C20.0116 13.3613 19.8396 13.3739 19.6703 13.4039C19.5379 13.4611 19.4149 13.5383 19.3054 13.6328C17.3609 14.9407 15.3947 16.2203 13.4811 17.5721C12.4238 18.3217 11.3665 18.513 10.1577 18.0519C9.46524 17.7854 8.72329 17.6442 8.03079 17.3839C7.90493 17.3312 7.79207 17.2511 7.70017 17.1492C7.60827 17.0473 7.53961 16.9261 7.49906 16.7943C7.47124 16.6218 7.74019 16.3144 7.95041 16.2078C8.77893 15.7906 9.63217 15.408 10.4885 15.0442C14.3529 13.4049 18.2214 11.7709 22.094 10.1421C22.4371 9.99818 22.7919 9.88484 23.1544 9.80339C24.0756 9.60266 24.4652 9.94452 24.5023 10.8854Z"
+                fill="#FFFDFB"
+              ></path>
+            </g>
+            <defs>
+              <clippath id="clip0_884_1709">
+                <rect
+                  width="32"
+                  height="32"
+                  fill="white"
+                  transform="translate(0.5)"
+                ></rect>
+              </clippath>
+            </defs>
+          </svg>
+          <span class="side-menu-contact__link-text">Чат</span></a
+        >
+        <a
+          href="tel:+78129662997"
+          target="_blank"
+          rel="nofollow"
+          aria-label="Телефон"
+          class="side-menu-contact__link"
+          ><svg
+            width="33"
+            height="32"
+            viewbox="0 0 33 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_884_1731)">
+              <path
+                d="M16.5249 9.28808e-06C25.3424 9.28808e-06 32.5095 7.21145 32.5002 16.0408C32.4909 24.8701 25.2805 32.0314 16.4476 32C7.61471 31.9687 0.459991 24.7635 0.500168 15.9937C0.543437 7.1268 7.68888 -0.00939694 16.5249 9.28808e-06ZM16.5249 30.2661C24.3843 30.2661 30.791 23.8981 30.8034 16.047C30.8158 8.19597 24.4368 1.7433 16.528 1.7433C8.61915 1.7433 2.20309 8.12699 2.20618 16.0063C2.20927 23.8856 8.59442 30.2567 16.5156 30.2755L16.5249 30.2661Z"
+                fill="#FFFDFB"
+              ></path>
+              <path
+                d="M6.45901 12.642C6.38391 11.955 6.45848 11.2597 6.67745 10.6052C6.89641 9.95075 7.2544 9.35305 7.72614 8.85439C8.89129 7.60023 10.384 7.80403 11.1783 9.29648C11.4596 9.8295 11.7006 10.3845 12.0004 10.905C12.6649 12.0494 12.8256 13.1186 11.8181 14.1877C11.166 14.8807 11.3483 15.6269 11.9355 16.3041C13.4808 18.107 15.2579 19.6089 17.4986 20.4868C18.5803 20.9069 19.4086 20.8003 19.8876 19.6778C20.549 18.1478 21.572 18.0882 22.8639 18.7717C23.2687 18.9849 23.7107 19.126 24.1341 19.2984C26.1553 20.1262 26.4397 21.9855 24.7522 23.5218C24.157 24.0721 23.4414 24.4711 22.6644 24.6858C21.8875 24.9006 21.0713 24.9251 20.2832 24.7572C17.5437 24.2524 14.97 23.0675 12.7916 21.3082C10.5757 19.5587 8.26392 17.1193 7.00295 14.5577C6.71009 13.9573 6.52585 13.3084 6.45901 12.642Z"
+                fill="#FFFDFB"
+              ></path>
+            </g>
+            <defs>
+              <clippath id="clip0_884_1731">
+                <rect
+                  width="32"
+                  height="32"
+                  fill="white"
+                  transform="translate(0.5)"
+                ></rect>
+              </clippath>
+            </defs>
+          </svg>
+          <span class="side-menu-contact__link-text">Звонок</span></a
+        >
+        <a
+          class="side-menu-contact__link"
+          href="https://t.me/ISTOK_Connect"
+          target="_blank"
+          aria-label="Телеграм канал"
+          ><svg
+            width="33"
+            height="32"
+            viewbox="0 0 33 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_884_1709)">
+              <path
+                d="M0.500025 16.0012C0.500025 7.15042 7.67844 0.00585938 16.517 0.00585938C25.2412 0.00585938 32.4784 7.21942 32.4969 15.7973C32.5217 24.8237 25.3865 32.0498 16.3161 32.0059C7.60737 31.9588 0.484568 24.7515 0.500025 16.0012ZM2.20653 16.0012C2.20653 23.842 8.59044 30.2683 16.449 30.2809C24.3076 30.2934 30.7811 23.9141 30.7873 16.1047C30.7886 14.2091 30.4202 12.3321 29.7032 10.5817C28.9862 8.83132 27.9349 7.24215 26.6099 5.90576C25.2849 4.56938 23.7123 3.5122 21.9827 2.79513C20.2531 2.07807 18.4008 1.71529 16.5325 1.72771C8.60899 1.71202 2.21581 8.09132 2.20653 16.0012Z"
+                fill="#FFFDFB"
+              ></path>
+              <path
+                d="M24.5023 10.8854C24.0478 13.7803 23.5995 16.6782 23.1358 19.5699C22.9689 20.6049 22.7803 21.6336 22.5763 22.6592C22.3104 23.9733 21.5252 24.3654 20.4122 23.6534C18.7088 22.5494 17.0425 21.3827 15.3824 20.2035C14.6713 19.7017 14.6466 19.2375 15.2865 18.6008C16.622 17.2616 17.9916 15.9537 19.3456 14.6333C19.604 14.3922 19.8457 14.1334 20.069 13.8587C20.1618 13.7395 20.1494 13.545 20.1835 13.3663C20.0116 13.3613 19.8396 13.3739 19.6703 13.4039C19.5379 13.4611 19.4149 13.5383 19.3054 13.6328C17.3609 14.9407 15.3947 16.2203 13.4811 17.5721C12.4238 18.3217 11.3665 18.513 10.1577 18.0519C9.46524 17.7854 8.72329 17.6442 8.03079 17.3839C7.90493 17.3312 7.79207 17.2511 7.70017 17.1492C7.60827 17.0473 7.53961 16.9261 7.49906 16.7943C7.47124 16.6218 7.74019 16.3144 7.95041 16.2078C8.77893 15.7906 9.63217 15.408 10.4885 15.0442C14.3529 13.4049 18.2214 11.7709 22.094 10.1421C22.4371 9.99818 22.7919 9.88484 23.1544 9.80339C24.0756 9.60266 24.4652 9.94452 24.5023 10.8854Z"
+                fill="#FFFDFB"
+              ></path>
+            </g>
+            <defs>
+              <clippath id="clip0_884_1709">
+                <rect
+                  width="32"
+                  height="32"
+                  fill="white"
+                  transform="translate(0.5)"
+                ></rect>
+              </clippath>
+            </defs>
+          </svg>
+          <span class="side-menu-contact__link-text">Сообщество</span></a
+        >
+        <a
+          class="side-menu-contact__link"
+          href="https://vk.com/istokmebel"
+          target="_blank"
+          aria-label="Группа вконтакте"
+          ><svg
+            width="33"
+            height="32"
+            viewbox="0 0 33 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_884_1714)">
+              <path
+                d="M32.5 16.0157C32.5 24.8517 25.3223 32.0126 16.4753 32.0126C7.62829 32.0126 0.484569 24.8297 0.500025 15.9781C0.500025 7.19552 7.71795 -0.0187548 16.4938 0.0157482C25.3532 0.0251582 32.5 7.1767 32.5 16.0157ZM30.7999 16.0157C30.7999 8.102 24.3795 1.70953 16.4444 1.71581C8.61129 1.71581 2.20327 8.15533 2.20327 16.0157C2.20327 23.8762 8.60204 30.2686 16.4629 30.2749C24.3795 30.2875 30.803 23.895 30.7999 16.0189V16.0157Z"
+                fill="#FFFDFB"
+              ></path>
+              <path
+                d="M17.7861 14.3369C17.7861 14.9642 17.7676 15.5916 17.7861 16.2189C17.7861 16.4259 17.8912 16.7741 18.0118 16.8023C18.1268 16.8178 18.2439 16.8078 18.3549 16.7732C18.4658 16.7385 18.5681 16.68 18.6547 16.6016C19.0911 16.1872 19.4799 15.7243 19.8139 15.2214C20.3767 14.2962 20.8925 13.3425 21.3595 12.364C21.6099 11.8433 21.9283 11.5735 22.5002 11.5955C23.072 11.6174 23.6563 11.5955 24.2343 11.6112C24.8124 11.6269 25.0257 11.8715 24.8124 12.4549C24.6329 12.9649 24.4063 13.4564 24.1354 13.9229C23.579 14.8639 22.9886 15.7641 22.392 16.6706C21.9159 17.3983 21.9283 17.53 22.5218 18.1793C23.2513 18.9791 23.9623 19.7978 24.6857 20.6102C24.8174 20.7456 24.9223 20.9053 24.9948 21.0807C25.103 21.4226 25.3039 21.868 25.1926 22.1158C25.0813 22.3636 24.5744 22.4294 24.2343 22.4294C21.8139 22.4044 22.4383 22.7431 20.7289 20.9207C20.2057 20.3585 19.6254 19.8539 18.9979 19.4151C18.2282 18.8819 17.8108 19.1422 17.7985 20.0707C17.7985 20.5318 17.7985 20.9929 17.7985 21.4539C17.7985 22.1879 17.6285 22.3573 16.8711 22.42C15.5192 22.5113 14.1748 22.1535 13.0411 21.4006C11.4615 20.4157 10.4044 18.9478 9.45536 17.3857C8.49927 15.9127 7.78809 14.2904 7.35024 12.5835C7.17713 11.8056 7.32861 11.5986 8.12613 11.608C8.64096 11.6362 9.1569 11.6362 9.67173 11.608C10.29 11.5547 10.5466 11.8527 10.7815 12.3765C11.3719 13.7127 11.9932 15.0332 12.6609 16.3287C12.9136 16.7586 13.2259 17.1495 13.5883 17.4892C13.6574 17.5609 13.7419 17.6155 13.8352 17.6487C13.9285 17.6819 14.028 17.6928 14.1261 17.6806C14.207 17.6268 14.2743 17.5545 14.3226 17.4695C14.3709 17.3845 14.3989 17.2892 14.4044 17.1913C14.4229 16.0401 14.4507 14.8827 14.3642 13.741C14.3333 13.2956 14.0365 12.8564 13.8077 12.4424C13.5234 11.9248 13.6347 11.6206 14.2127 11.6049C15.205 11.5798 16.1972 11.6049 17.1864 11.6049C17.6687 11.6049 17.7676 11.9186 17.7738 12.3169C17.7923 12.9976 17.7861 13.6688 17.7861 14.3369Z"
+                fill="#FFFDFB"
+              ></path>
+            </g>
+            <defs>
+              <clippath id="clip0_884_1714">
+                <rect
+                  width="32"
+                  height="32"
+                  fill="white"
+                  transform="translate(0.5)"
+                ></rect>
+              </clippath>
+            </defs>
+          </svg>
+          <span class="side-menu-contact__link-text">Сообщество</span></a
+        >
+      </div>
+    </div>
+
+    <script
+      src="{% static 'src/js/pageEntryPoints/profilePersonalData.js' %}"
+      type="module"
+      defer
+    ></script>
+    <script>
+      function togglePasswordVisibility(id) {
+        const input = document.getElementById(id);
+        const type =
+          input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute("type", type);
+      }
+    </script>
+  </body>
+</html>

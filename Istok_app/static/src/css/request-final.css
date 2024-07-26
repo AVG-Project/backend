@@ -1,0 +1,121 @@
+.page__body {
+  --_space-top: 93px;
+  --_space-bottom: 40px;
+  height: 100vh;
+  margin: 0 auto;
+  padding-top: var(--_space-top) ;
+  padding-bottom: var(--_space-bottom);
+  overflow-y: auto;
+}
+
+.page__body::-webkit-scrollbar {
+  display: none;
+}
+
+.request-final__content {
+  display: grid;
+  grid-template-columns: 46.45% 53.55%;
+  gap: 40px;
+  /* margin-bottom: 40px; */
+  /* height: 100%; */
+  max-height: calc(100vh - var(--_space-top) - var(--_space-bottom));
+}
+
+.request-final__img-wrapper {
+  grid-column: 1/2;
+  position: relative;
+  display: flex;
+  height: 100%;
+  max-height: calc(100vh - var(--_space-top) - var(--_space-bottom));
+}
+
+.request-final__img {
+
+  height: auto;
+  width: 100%;
+  object-fit: cover;
+
+}
+
+@media (max-width: 1120px) {
+  .request-final__img {
+    display: none;
+  }
+
+  .request-final__content {
+    grid-template-columns: 0 1fr;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .request-final__right-wrapper {
+    grid-column: 1/-1;
+  }
+}
+
+.request-final__right-wrapper {
+  position: relative;
+  grid-column: 2/3;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  height: 100%;
+}
+
+.request-final__text-content {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: start;
+  justify-content: start;
+  width: 100%;
+  height: 100%;
+  max-width: 812px;
+  max-height: 536px;
+  background-color: var(--beige);
+  padding: clamp(40px, 7vh, 112px) clamp(20px, 5vw, 80px);
+  margin-bottom: 47px;
+}
+
+.request-final__title {
+  font-size: clamp(24px, 7dvh, 48px);
+  margin-bottom: 40px;
+}
+
+.request-final__text {
+  font-family: var(--font-main);
+  font-weight: var(--weight-regular);
+  line-height: clamp(16px, 7dvh, var(--line-height-28));;
+  color: var(--light-black);
+  font-size: clamp(14px, 7dvh, 24px);
+  margin-bottom: 30px;
+}
+
+
+.request-final__to-main {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  max-width: 486px;
+  width: 100%;
+  font-size: 14px;
+  height: 40px;
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  color: var(--light-black);
+  text-align: center;
+  border: 1px solid var(--light-black);
+}
+
+.request-final__to-main:hover, .request-final__to-main:focus {
+  background-color: var(--beige);
+}
+
+.request-final__to-main:active {
+  background-color: var(--green);
+  color: var(--whitish);
+}
+
+
+

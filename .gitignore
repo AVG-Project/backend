@@ -1,0 +1,17 @@
+__pycache__/
+.idea/
+*venv/
+*.pyc
+.ipynb_checkpoints
+*.egg-info
+/env
+/.env
+cache_files/*
+
+proba.py
+celery*
+!prjboard/celery.py
+
+#passenger_wsgi.py
+#static/
+#cgi-bin/

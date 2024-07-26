@@ -1,0 +1,114 @@
+.button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid var(--light-black);
+  font-family: var(--font-main);
+  font-size: var(--font-24);
+  font-weight: var(--weight-light-x);
+  line-height: var(--line-height-32);
+  color: var(--light-black);
+
+  background-color: transparent;
+  height: 68px;
+  width: 100%;
+  max-width: 345px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.button:hover,
+.button:focus {
+  background-color: var(--beige);
+}
+
+.button:active {
+  background-color: var(--green);
+  color: var(--whitish);
+}
+
+.button_white {
+  background-color: var(--whitish);
+}
+
+.button_short {
+  max-width: 263px;
+}
+
+.button_slim {
+  height: 48px;
+  font-size: var(--font-16);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-26);
+  color: var(--light-black);
+}
+
+.button_slim_x {
+  height: 40px;
+  max-width: 148px;
+  font-size: var(--font-12);
+  font-weight: var(--weight-regular);
+  color: var(--light-black);
+}
+
+.button_mid {
+  height: 52px !important;
+  max-width: 312px !important;
+  font-size: var(--font-16);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-height-26);
+  color: var(--light-black);
+}
+
+.button_register {
+  height: 40px;
+  max-width: 236px;
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  color: var(--light-black);
+}
+
+.button_transparent_slim {
+  all: unset;
+  display: flex;
+  align-items: center;
+  max-width: fit-content;
+  height: 40px;
+  font-size: var(--font-12);
+  font-weight: var(--weight-regular);
+  color: var(--light-black);
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.button-select_slim {
+  display: flex;
+  height: 40px;
+  width: 148px;
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  color: var(--light-black);
+  padding: 0 12px;
+  margin: 0;
+}
+
+.button-select_slim:has(input[type="radio"]:checked) {
+  background-color: var(--green);
+}
+
+.button-select_slim_long {
+  width: 264px;
+}
+
+.button_submit {
+  height: 40px;
+  font-size: var(--font-14);
+  font-weight: var(--weight-regular);
+  color: var(--light-black);
+}

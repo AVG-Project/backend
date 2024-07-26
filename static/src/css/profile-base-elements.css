@@ -1,0 +1,100 @@
+.profile__body {
+    --_profile-space-side: 102px;
+    --_profile-space-gap: 80px;
+    position: relative;
+    /* max-width: 1440px; */
+    margin: 0 auto;
+    /* height: 100%; */
+    padding: 104px var(--_profile-space-side);
+    position: relative;
+    overflow-y: scroll;
+  }
+  
+  
+  .profile__body::-webkit-scrollbar {
+    display: none;
+  
+  }
+  
+  .profile__main {
+    display: grid;
+    grid-template-columns: 286px 1fr;
+    grid-template-rows: 100%;
+    width: 100%;
+    column-gap: var(--_profile-space-gap);
+  }
+  
+  .profile__nav {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+  
+  .profile__nav-container {
+    --padding-left: 24px;
+  
+    max-height: 418px;
+    padding: 16px 42px 26px var(--padding-left);
+    border: 1px solid #e8e9da;
+  }
+  
+  .profile__nav-links {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
+    height: 100%;
+  }
+  
+  .profile__navlink_exit {
+    margin-top: 40px;
+  }
+  
+  .profile__navlink {
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px 16px;
+    height: 56px;
+    transition: all 0.2s ease-in-out;
+    border-radius: 2px;
+  }
+  
+  
+  
+  .profile__navlink:hover {
+    background-color: var(--whitish);
+    transform: translateX(calc(-1 * var(--padding-left)));
+    background-color: var(--beige);
+    opacity: 0.7;
+  }
+  .profile__navlink_active {
+    background-color: var(--beige);
+  }
+  
+  .profile__main-content {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    height: 100%;
+  }
+  
+  .profile__title {
+    /* max-width: 318px; */
+    height: 48px;
+    margin-bottom: 48px;
+    font-family: var(--font-secondary);
+    font-weight: var(--weight-bold-semi);
+    font-size: 40px;
+    line-height: 48px;
+    color: var(--light-black);
+    font-size: var(--font-40);
+  }
+  
+  .profile__content-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    row-gap: 32px;
+    column-gap: 40px;
+    width: 100%;
+    height: 100%;
+  }

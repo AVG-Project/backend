@@ -1,0 +1,89 @@
+.main__product-container {
+  display: flex;
+  margin: 0 auto;
+}
+
+.main__product {
+  padding: 0 var(--padding-102);
+  margin-top: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: 5%;
+}
+
+.main__product h1 {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.main__product-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5%;
+}
+
+.main__product-image-lines {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.main__product-wrapper {
+  margin-top: 1%;
+  display: flex;
+  flex-direction: row;
+  gap: 5%;
+}
+
+.main__product-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main__product-info,
+.main__product-detail,
+.main__product-description,
+.main__product-liked,
+.main__product-liked-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.main__product-info {
+  justify-content: space-between;
+}
+
+.main__product-detail,
+.main__product-description {
+  gap: 20px;
+}
+
+.main__product-order {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.main__product-order-btn {
+  height: 50px !important;
+  width: 40% !important;
+  font-size: var(--font-18) !important;
+}
+
+.main__product-liked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.main__product-liked-cards {
+  display: flex;
+  align-items: center;
+}
