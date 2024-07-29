@@ -18,44 +18,33 @@ class ProjectImage(models.Model):
 
     def save(self, *args, **kwargs):
         super(ProjectImage, self).save(*args, **kwargs)
-        print('Model init\n')
         if self.image and not self.image_medium and not self.image_small and not self.only_one_image:
-            print('self image on\n')
             self.image_medium = self.reduce_image(2)
-            print('self.image_medium == ', self.image_medium)
             self.image_small = self.reduce_image(5)
-            print('self.image_small == ', self.image_small)
+            self.save()
+        elif self.image.name not in self.image_medium.name and not self.only_one_image:
+            self.image_medium = self.reduce_image(2)
+            self.image_small = self.reduce_image(5)
             self.save()
 
 
-    def reduce_image(self, rate):
+
+    def reduce_image(self, rate: int) -> str:
 
         image = Image.open(self.image.path)
         name = self.image.name
         file_name = os.path.splitext(name)[0]
         file_format = os.path.splitext(name)[1]
-        print('\nreduce_image on\n')
-        print('\nimage == ', image, '\nname == ', name,
-            '\nfile_name == ', file_name, '\nfile_format == ', file_format)
-
         if rate > 2:
-            size_name = '_small'
+            size_name = 'small_'
         else:
-            size_name = '_medium'
-
-        path = (settings.MEDIA_ROOT + '\\' + file_name + size_name + file_format)
-        print('settings.MEDIA_ROOT == ', settings.MEDIA_ROOT)
-        print('path == ', path)
-
+            size_name = 'medium_'
+        new_name = size_name + file_name + file_format
+        path = self.image.path[:(len(name)*-1)] + new_name
         size = (image.size[0] // rate, image.size[1] // rate)
         image = image.resize(size)
         image.save(path)
-        return path
-
-
-# MEDIA_URL = '/media/'  # ! loc
-# # MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
-# os.path.splitext(name1)
+        return new_name
 
 
 
@@ -99,11 +88,15 @@ class Description(models.Model):
 class Furniture(models.Model):
     #todo создать для каждого выбора внешний ключ на таблицу
     TYPES = [
-        ('1', 'Гардероб'),
-        ('2', 'Стол'),
-        ('3', 'Комод'),
-        ('4', 'Тумбочка'),
-        ('5', 'Шкаф'),
+        ('1', 'Кухня'),
+        ('2', 'Гардероб'),
+        ('3', 'Стол'),
+        ('4', 'Комод'),
+        ('5', 'Тумбочка'),
+        ('6', 'Шкаф'),
+        ('7', 'Прихожая'),
+        ('8', 'Системы хранения'),
+        ('9', 'Стеллаж'),
     ]
 
     FORMS = [
@@ -135,19 +128,25 @@ class Furniture(models.Model):
         ('8', 'Кантри'),
     ]
 
+    TABLETOP_MATERIAL = [
+        ('1', 'Столешница ДСП с покрытием HPL'),
+        ('2', 'Столешница компакт-ламинат'),
+        ('3', 'Кварцевая столешница'),
+        ('4', 'Акриловая столешница'),
+        ('5', 'Пластик Fenix')
+    ]
+
     name = models.CharField(max_length=150, verbose_name='Название')
     type = models.CharField(max_length=2, choices=TYPES, default='1', verbose_name='Тип мебели')
     form = models.CharField(max_length=2, choices=FORMS, default='1', verbose_name='Форма мебели')
     style = models.CharField(max_length=2, choices=STYLES, default='1', verbose_name='Стиль мебели')
     body_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал корпуса')
     facades_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал фасадов')
-    tabletop_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал столешницы')
+    tabletop_material = models.CharField(max_length=2, choices=TABLETOP_MATERIAL, default='1', verbose_name='Материал столешницы')
     price = models.PositiveIntegerField(verbose_name='Стоимость', default=1)
     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     text = models.TextField(verbose_name='Описание мебели')
-    # texts = models.ManyToManyField(Tags, through='FurnitureDescription', related_name='tags',
-    #     verbose_name='Теги')
-
+    
     tags = models.ManyToManyField(Tags, through='FurnitureTags', related_name='tags',
         verbose_name='Теги')
     purposes = models.ManyToManyField(Purpose, through='FurniturePurpose', related_name='purposes',

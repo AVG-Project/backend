@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'debug_toolbar',
+    'django_filters',
 
     'Istok_app.apps.IstokAppConfig',
     'crispy_forms',
@@ -190,6 +191,8 @@ LOGOUT_REDIRECT_URL = 'home'
 LOGOUT_URL = 'logout'
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 2,
 
@@ -210,7 +213,7 @@ REST_FRAMEWORK = {
     ],
 }
 ##########
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 ########## debug toolbar
 INTERNAL_IPS = [
     "127.0.0.1",

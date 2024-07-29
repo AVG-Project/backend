@@ -5,6 +5,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'furniture_list', views.FurnitureList, basename='furniture_list')
+# router.register(r'variables', views.variables, basename='variables')
 
 
 urlpatterns = [

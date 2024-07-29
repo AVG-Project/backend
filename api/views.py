@@ -2,8 +2,9 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags
+from Istok_app.models import Furniture, Tags, Purpose
 from .serializers import ListFurnitureSerializer
+
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
@@ -15,6 +16,9 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import FurnitureFilter
+from rest_framework.filters import OrderingFilter  # если импортировать по другому будет ошибка
 
 
 class FurniturePagination(PageNumberPagination):
@@ -24,17 +28,17 @@ class FurniturePagination(PageNumberPagination):
 
 
 
-
-
-
 class FurnitureList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
-                    # mixins.CreateModelMixin,
-                    # mixins.UpdateModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
     serializer_class = ListFurnitureSerializer
     pagination_class = FurniturePagination
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = FurnitureFilter
+    ordering_fields = ['price', 'time_created']
     # permission_classes = (IsAdminOrReadOnly, )
 
 
@@ -50,14 +54,33 @@ class FurnitureList(mixins.ListModelMixin,
         return Furniture.objects.filter(pk=pk)
 
 
+def choice_list_to_dict(lst_of_tup):
+    lst = []
+    for tup in lst_of_tup:
+        lst.append({'id': tup[0], 'name': tup[1]})
+    return lst
+
 
 def variables(request):
-    all_furniture_type = dict(Furniture.TYPES)
-    all_furniture_forms = dict(Furniture.FORMS)
-    all_furniture_material = dict(Furniture.MATERIAL)
-    all_furniture_styles = dict(Furniture.STYLES)
-    return JsonResponse({'all_furniture_type': all_furniture_type, 'all_furniture_forms': all_furniture_forms,
-                     'all_furniture_material': all_furniture_material, 'all_furniture_styles': all_furniture_styles, })
+    furniture_types = choice_list_to_dict(Furniture.TYPES)
+    furniture_forms = choice_list_to_dict(Furniture.FORMS)
+    tabletop_materials = choice_list_to_dict(Furniture.TABLETOP_MATERIAL)
+    furniture_materials = choice_list_to_dict(Furniture.MATERIAL)
+    furniture_styles = choice_list_to_dict(Furniture.STYLES)
+    purposes = list(Purpose.objects.all().values())
+    filter_items = [
+        {'name': 'Тип мебели', 'options': furniture_types},
+        {'name': 'По форме', 'options': furniture_forms},
+        {'name': 'Материал столешницы', 'options': tabletop_materials},
+        {'name': 'Материал фасадов', 'options': furniture_materials},
+        {'name': 'Стиль', 'options': furniture_styles},
+        {'name': 'Назначение', 'options': purposes}
+    ]
+
+    return JsonResponse({'filter_items': filter_items})
+
+
+
 
 
 
