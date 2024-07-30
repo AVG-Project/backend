@@ -86,7 +86,7 @@ class Description(models.Model):
 
 
 class Furniture(models.Model):
-    #todo создать для каждого выбора внешний ключ на таблицу
+
     TYPES = [
         ('1', 'Кухня'),
         ('2', 'Гардероб'),
@@ -155,9 +155,6 @@ class Furniture(models.Model):
         verbose_name='Теги')
 
 
-
-
-
     class Meta:
         verbose_name = "Мебель"
         verbose_name_plural = "Вся мебель"
@@ -196,6 +193,33 @@ class FurnitureImage(models.Model):
     def __str__(self):
         return f'Мебель({self.furniture.pk}) Изображение(id={self.project_image.pk})={self.project_image.image.path}'
 #######
+
+
+class News(models.Model):
+    title = models.TextField(verbose_name='Титульная часть новости')
+    text = models.TextField(verbose_name='Текст новости')
+    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    image = models.ImageField(verbose_name='Изображение')
+
+
+    def __str__(self):
+        return f'{self.title[:15]}|Дата: {self.time_created.date()}'
+
+
+    class Meta:
+        verbose_name = "Новость"
+        verbose_name_plural = "Новости"
+
+
+
+
+
+
+
+
+
+
+
 
 
 class Application(models.Model):

@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags, Purpose
-from .serializers import ListFurnitureSerializer
+from Istok_app.models import Furniture, Tags, Purpose, News
+from .serializers import ListFurnitureSerializer, NewsListSerializer
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -30,8 +30,8 @@ class FurniturePagination(PageNumberPagination):
 
 class FurnitureList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
-                    mixins.CreateModelMixin,
-                    mixins.UpdateModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
     serializer_class = ListFurnitureSerializer
@@ -40,11 +40,6 @@ class FurnitureList(mixins.ListModelMixin,
     filterset_class = FurnitureFilter
     ordering_fields = ['price', 'time_created']
     # permission_classes = (IsAdminOrReadOnly, )
-
-
-
-    def list_view_change(self, data):
-        pass
 
 
     def get_queryset(self):
@@ -80,6 +75,22 @@ def variables(request):
     return JsonResponse({'filter_items': filter_items})
 
 
+class NewsList(mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = NewsListSerializer
+    filter_backends = [OrderingFilter]
+    ordering = ['-time_created']
+
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk', None)
+        if not pk:
+            return News.objects.all().order_by('-id')
+        return News.objects.filter(pk=pk)
 
 
 

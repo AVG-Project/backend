@@ -1,10 +1,10 @@
 from django.contrib import admin
 from Istok_app.models import (Orders, Furniture, Application, Parts, Tags,
-                              FurnitureTags, FurniturePurpose, Purpose, ProjectImage, FurnitureImage)
+                              FurnitureTags, FurniturePurpose, Purpose, ProjectImage, FurnitureImage, News)
 
 
 istok_app_models = [Tags, Orders, Application, Parts, FurnitureTags,
-                    FurniturePurpose, Purpose, ProjectImage, FurnitureImage]
+                    FurniturePurpose, Purpose, ProjectImage, FurnitureImage, News]
 
 
 admin.site.register(istok_app_models)
