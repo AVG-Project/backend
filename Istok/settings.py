@@ -26,14 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # ! loc
+DEBUG = True  #! loc
 # DEBUG = False  #! hosting
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "team19.pythonanywhere.com", 'leshiy.fun', 'www.leshiy.fun']
+ALLOWED_HOSTS = ["127.0.0.1", "team19.pythonanywhere.com", 'leshiy.fun', 'www.leshiy.fun', 'http://localhost:3000/',
+                 '46.31.26.194', '46.39.249.96', "http://127.0.0.1:3000"]
 
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", 'https://leshiy.fun']
+CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -52,22 +55,26 @@ INSTALLED_APPS = [
     'bootstrap4',
     'crispy_bootstrap4',
 
+
     'users.apps.UsersConfig',
 
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
     'api.apps.ApiConfig',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # выше CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 
     # debug toolbar
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -90,6 +97,8 @@ TEMPLATES = [
         },
     },
 ]
+
+
 
 WSGI_APPLICATION = 'Istok.wsgi.application'
 
@@ -181,7 +190,7 @@ EMAIL_USE_SSL = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'  # ! loc
+MEDIA_URL = '/media/'  #! loc
 # MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
 
 ########## rest
@@ -198,8 +207,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        #! loc
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  #! loc
     ],
 
     # 'DEFAULT_PERMISSION_CLASSES': [
@@ -214,10 +222,10 @@ REST_FRAMEWORK = {
 }
 ##########
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-########## debug toolbar
+########## for debug toolbar
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 ##########
-
+# AUTH_USER_MODEL = 'users.CustomUser'
 

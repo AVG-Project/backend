@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Istok_app.models import (Furniture, Tags, Purpose, Description, ProjectImage, News)
+from Istok_app.models import (Furniture, Tags, Purpose, Description, ProjectImage, News, Order)
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -73,6 +73,17 @@ class NewsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = ['id', 'title', 'text', 'time_created', 'image']
+
+
+
+class ListOrdersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ['id', 'number', 'create_date', 'shipment_date', 'status', 'address', 'contract', 'images']
+        depth = 1  # для полного отображения моделей M2M
+
+
 
 
 

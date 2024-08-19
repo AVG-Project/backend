@@ -1,0 +1,5 @@
+1. В settings
+    MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
+
+2. дебаг мод
+3. Проверить наличие env

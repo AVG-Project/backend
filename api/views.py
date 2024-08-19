@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags, Purpose, News
-from .serializers import ListFurnitureSerializer, NewsListSerializer
+from Istok_app.models import Furniture, Tags, Purpose, News, Order
+from .serializers import ListFurnitureSerializer, NewsListSerializer, ListOrdersSerializer
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -63,13 +63,15 @@ def variables(request):
     furniture_materials = choice_list_to_dict(Furniture.MATERIAL)
     furniture_styles = choice_list_to_dict(Furniture.STYLES)
     purposes = list(Purpose.objects.all().values())
+    # order_statuses = choice_list_to_dict(Order.STATUSES)
     filter_items = [
-        {'name': 'Тип мебели', 'options': furniture_types},
-        {'name': 'По форме', 'options': furniture_forms},
-        {'name': 'Материал столешницы', 'options': tabletop_materials},
-        {'name': 'Материал фасадов', 'options': furniture_materials},
-        {'name': 'Стиль', 'options': furniture_styles},
-        {'name': 'Назначение', 'options': purposes}
+        {'name': 'Типы мебели', 'options': furniture_types},
+        {'name': 'Формы', 'options': furniture_forms},
+        {'name': 'Материалы столешниц', 'options': tabletop_materials},
+        {'name': 'Материалы фасадов', 'options': furniture_materials},
+        {'name': 'Стили', 'options': furniture_styles},
+        {'name': 'Назначения', 'options': purposes},
+        # {'name': 'Статусы доставок', 'options': order_statuses},
     ]
 
     return JsonResponse({'filter_items': filter_items})
@@ -89,10 +91,25 @@ class NewsList(mixins.ListModelMixin,
     def get_queryset(self):
         pk = self.kwargs.get('pk', None)
         if not pk:
-            return News.objects.all().order_by('-id')
+            return News.objects.all().order_by('-time_created')
         return News.objects.filter(pk=pk)
 
 
+class OrdersList(mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = ListOrdersSerializer
+    ordering = ['-create_date']
+
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk', None)
+        if not pk:
+            return Order.objects.all().order_by('-create_date')
+        return Order.objects.filter(pk=pk)
 
 
 
