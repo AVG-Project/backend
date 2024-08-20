@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 router.register(r'furniture_list', views.FurnitureList, basename='furniture_list')
 router.register(r'news_list', views.NewsList, basename='news_list')
 router.register(r'orders_list', views.OrdersList, basename='orders_list')
+router.register(r'applications_list', views.ApplicationsList, basename='applications_list')
 
 
 urlpatterns = [

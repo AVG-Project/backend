@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags, Purpose, News, Order
-from .serializers import ListFurnitureSerializer, NewsListSerializer, ListOrdersSerializer
+from Istok_app.models import Furniture, Tags, Purpose, News, Order, Application
+from .serializers import FurnitureListSerializer, NewsListSerializer, OrdersListSerializer, ApplicationSerializer
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -34,7 +34,7 @@ class FurnitureList(mixins.ListModelMixin,
                     # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = ListFurnitureSerializer
+    serializer_class = FurnitureListSerializer
     pagination_class = FurniturePagination
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FurnitureFilter
@@ -101,7 +101,7 @@ class OrdersList(mixins.ListModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = ListOrdersSerializer
+    serializer_class = OrdersListSerializer
     ordering = ['-create_date']
 
 
@@ -112,13 +112,27 @@ class OrdersList(mixins.ListModelMixin,
         return Order.objects.filter(pk=pk)
 
 
+class ApplicationsList(mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
 
+    serializer_class = ApplicationSerializer
+    ordering = ['-time_created']
+
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk', None)
+        if not pk:
+            return Application.objects.all().order_by('-time_created')
+        return Application.objects.filter(pk=pk)
 
 
 
 
 # class FurnitureSet(viewsets.ModelViewSet):
-#     serializer_class = ListFurnitureSerializer
+#     serializer_class = FurnitureListSerializer
 #     pagination_class = FurniturePagination
 #
 #

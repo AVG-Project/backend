@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Istok_app.models import (Furniture, Tags, Purpose, Description, ProjectImage, News, Order)
+from Istok_app.models import (Furniture, Tags, Purpose, Description, ProjectImage, News, Order, Application)
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -53,7 +53,7 @@ class ChoiceField(serializers.ChoiceField):
         self.fail('invalid_choice', input=data)
 
 
-class ListFurnitureSerializer(serializers.ModelSerializer):
+class FurnitureListSerializer(serializers.ModelSerializer):
     type = ChoiceField(choices=Furniture.TYPES)
     form = ChoiceField(choices=Furniture.FORMS)
     style = ChoiceField(choices=Furniture.STYLES)
@@ -76,7 +76,7 @@ class NewsListSerializer(serializers.ModelSerializer):
 
 
 
-class ListOrdersSerializer(serializers.ModelSerializer):
+class OrdersListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
@@ -84,6 +84,13 @@ class ListOrdersSerializer(serializers.ModelSerializer):
         depth = 1  # для полного отображения моделей M2M
 
 
+class ApplicationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Application
+        fields = ['id', 'time_created', 'user', 'text', 'last_name', 'first_name', 'patronymic', 'phone',
+                  'contact_type', 'link', 'date_time', 'python_date_time']
+        # depth = 1  # для полного отображения моделей M2M
 
 
 
@@ -93,7 +100,7 @@ class ListOrdersSerializer(serializers.ModelSerializer):
 
 #todo разобраться с валидациями
 
-# class ListFurnitureSerializer(serializers.Serializer):
+# class FurnitureListSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
 #
 #     name = serializers.CharField(max_length=100, label='Название', help_text='Не более 100 символов')
@@ -131,7 +138,7 @@ class ListOrdersSerializer(serializers.ModelSerializer):
     #         new_project_image = ProjectImage.objects.create(**kwargs)
     #         return new_project_image
     #     except Exception as e:
-    #         mess = f"ERROR!:{e}\nFrom: ListFurnitureSerializer.create_image" \
+    #         mess = f"ERROR!:{e}\nFrom: FurnitureListSerializer.create_image" \
     #                f"\nkwargs=={kwargs}"
     #         print(mess)
     #         return None
@@ -149,7 +156,7 @@ class ListOrdersSerializer(serializers.ModelSerializer):
     #                 tags_id_list = [obj['id'] for obj in tags]
     #                 new.tags.set(tags_id_list)
     #             except Exception as e:
-    #                 mess = f"ERROR!:{e}\nFrom: ListFurnitureSerializer.create" \
+    #                 mess = f"ERROR!:{e}\nFrom: FurnitureListSerializer.create" \
     #                        f"\ntags=={tags}\nvalidated_data=={validated_data}"
     #                 new.delete()
     #                 print(mess)
@@ -161,7 +168,7 @@ class ListOrdersSerializer(serializers.ModelSerializer):
     #                 purposes_id_list = [obj['id'] for obj in purposes]
     #                 new.purposes.set(purposes_id_list)
     #             except Exception as e:
-    #                 mess = f"ERROR!:{e}\nFrom: ListFurnitureSerializer.create" \
+    #                 mess = f"ERROR!:{e}\nFrom: FurnitureListSerializer.create" \
     #                        f"\ntags=={purposes}\nvalidated_data=={validated_data}"
     #                 new.delete()
     #                 print(mess)
@@ -173,7 +180,7 @@ class ListOrdersSerializer(serializers.ModelSerializer):
     #                 print('images_id_list == ', images_id_list)
     #                 new.images.set(images_id_list)
     #             except Exception as e:
-    #                 mess = f"ERROR!:{e}\nFrom: ListFurnitureSerializer.create" \
+    #                 mess = f"ERROR!:{e}\nFrom: FurnitureListSerializer.create" \
     #                        f"\nimages=={images}"
     #                 new.delete()
     #                 print(mess)

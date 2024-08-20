@@ -1,12 +1,10 @@
 from django.contrib import admin
-# from Istok_app.models import (Order, Furniture, Tags,
-#                               FurnitureTags, FurniturePurpose, Purpose, ProjectImage, FurnitureImage, News, OrderImage)
 
 from Istok_app import models
 
-# istok_app_models = [models.Tags, models.FurnitureTags, models.FurniturePurpose, models.Purpose,
-#                     models.ProjectImage, models.FurnitureImage, models.News, models.OrderImage]
-istok_app_models = [models.Tags, models.Purpose, models.News, models.ProjectImage]
+
+
+istok_app_models = [models.Tags, models.Purpose, models.News, models.ProjectImage, models.Application]
 
 admin.site.register(istok_app_models)
 

@@ -298,43 +298,40 @@ class OrderImage(models.Model):
 #######
 
 
+class Application(models.Model):
+
+    PHONE_REGEX = RegexValidator(
+        regex=r'^\+?1?\d{9,13}$',
+        message="Телефон должен быть указан в формате: "
+                "'+7ХХХХХХХХХХ'. Максимум 13 символов.")
+
+    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Пользователь', null=True, blank=True)
+
+    text = models.TextField(blank=False, verbose_name='Дополнительная информация')
+    last_name = models.CharField(max_length=150, verbose_name='Фамилия')
+    first_name = models.CharField(max_length=150, verbose_name='Имя')
+    patronymic = models.CharField(null=True, blank=True, max_length=150, verbose_name='Отчество')
+    phone = models.CharField(validators=[PHONE_REGEX], max_length=13,
+                             blank=False, verbose_name='Ваш номер телефона')
+    contact_type = models.CharField(null=True, blank=True, max_length=150, verbose_name='Как с Вами связаться?')
+    link = models.CharField(null=True, blank=True, max_length=150, verbose_name='Ваша ссылка на Telegram/ВКонтакте')
+    date_time = models.CharField(null=True, blank=True, max_length=30, verbose_name='Дата и время встречи')
+
+    python_date_time = models.DateTimeField(null=True, blank=True,
+        verbose_name='Для теста перевода формата времени из js в python')
+
+
+    def __str__(self):
+        return f'ID={self.pk} | phone={self.phone}'
+
+    class Meta:
+        verbose_name = "Заявка"
+        verbose_name_plural = "Заявки пользователей"
 
 
 
 
-
-
-
-
-
-
-
-# class Application(models.Model):
-#
-#     phone_regex = RegexValidator(
-#         regex=r'^\+?1?\d{9,12}$',
-#         message="Телефон должен быть указан в формате: "
-#                 "'+7ХХХХХХХХХХ'. Максимум 12 символов.")
-#
-#     type = models.CharField(null=True, blank=True, max_length=150, verbose_name='Тип мебели')
-#     form = models.CharField(null=True, blank=True, max_length=150, verbose_name='Форма мебели')
-#     addition = models.CharField(null=True, blank=True, max_length=150, verbose_name='Дополнения')
-#     facades_material = models.CharField(null=True, blank=True, max_length=150, verbose_name='Материал фасада')
-#     table_material = models.CharField(null=True, blank=True, max_length=150, verbose_name='Материал столешницы')
-#     plumb = models.CharField(null=True, blank=True, max_length=150, verbose_name='Кухонная сантехника')
-#     appliances = models.CharField(null=True, blank=True, max_length=150, default=None, verbose_name='Бытовая техника')
-#     budget = models.CharField(null=True, blank=True, max_length=150, verbose_name='Бюджет проекта')
-#     consultation = models.CharField(null=True, blank=True, max_length=150,
-#                                     verbose_name='Консультация с экспертом по обустройству дома')
-#     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
-#     first_name = models.CharField(max_length=150, verbose_name='Имя')
-#     patronymic = models.CharField(null=True, blank=True, max_length=150, verbose_name='Отчество')
-#     phone = models.CharField(validators=[phone_regex], max_length=12,
-#                              blank=False, verbose_name='Ваш номер телефона')
-#     connection = models.CharField(null=True, blank=True, max_length=150, verbose_name='Как с Вами связаться?')
-#     link = models.CharField(null=True, blank=True, max_length=150, verbose_name='Ваша ссылка на Telegram/ВКонтакте')
-#     data = models.CharField(null=True, blank=True, max_length=30, verbose_name='Дата')
-#     time = models.CharField(null=True, blank=True, max_length=30, verbose_name='Время')
 #
 #
 #
