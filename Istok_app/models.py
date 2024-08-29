@@ -21,7 +21,7 @@ class ProjectImage(models.Model):
 
 
     def __str__(self):
-        return self.image.name
+        return f'id={self.pk} | name={self.image.name}'
 
     class Meta:
         verbose_name = "Изображение"
@@ -119,8 +119,8 @@ class News(models.Model):
     title = models.TextField(verbose_name='Титульная часть новости')
     text = models.TextField(verbose_name='Текст новости')
     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    image = models.ImageField(verbose_name='Изображение')
-    extra_url = models.URLField(verbose_name='Ссылка на внешний источник', default='')
+    image = models.ImageField(verbose_name='Изображение', blank=True)
+    extra_url = models.URLField(verbose_name='Ссылка на внешний источник', default='', blank=True)
 
 
     def __str__(self):
@@ -244,6 +244,10 @@ class FurnitureImage(models.Model):
         return f'Мебель({self.furniture.pk}) Изображение(id={self.project_image.pk})={self.project_image.image.path}'
 
     class Meta:
+        # Для уникальности м2м
+        constraints = [
+            models.UniqueConstraint(fields=['furniture', 'project_image'], name='furniture_project_image'),
+        ]
         verbose_name = "Изображение для мебели"
         verbose_name_plural = "Изображения для мебели"
 
@@ -255,6 +259,9 @@ class OrderImage(models.Model):
         return f'Номер заказа - {self.order.pk} | Название изображения - {self.order_image.image.name}'
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['order', 'order_image'], name='order_order_image'),
+        ]
         verbose_name = "Изображение для заказа"
         verbose_name_plural = "Изображения для заказа"
 
