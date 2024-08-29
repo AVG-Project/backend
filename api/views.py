@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags, Purpose, News, Order, Application
+from Istok_app.models import Furniture, Tags, News, Order, Application, FurnitureCategory
 from .serializers import FurnitureListSerializer, NewsListSerializer, OrdersListSerializer, ApplicationSerializer
 
 from rest_framework.response import Response
@@ -22,7 +22,7 @@ from rest_framework.filters import OrderingFilter  # если импортиро
 
 
 class FurniturePagination(PageNumberPagination):
-    page_size = 3
+    page_size = 4
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
@@ -30,8 +30,8 @@ class FurniturePagination(PageNumberPagination):
 
 class FurnitureList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
-                    # mixins.CreateModelMixin,
-                    # mixins.UpdateModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
     serializer_class = FurnitureListSerializer
@@ -39,7 +39,7 @@ class FurnitureList(mixins.ListModelMixin,
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FurnitureFilter
     ordering_fields = ['price', 'time_created']
-    # permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
 
 
     def get_queryset(self):
@@ -56,22 +56,14 @@ def choice_list_to_dict(lst_of_tup):
     return lst
 
 
+#todo
 def variables(request):
-    furniture_types = choice_list_to_dict(Furniture.TYPES)
-    furniture_forms = choice_list_to_dict(Furniture.FORMS)
-    tabletop_materials = choice_list_to_dict(Furniture.TABLETOP_MATERIAL)
-    furniture_materials = choice_list_to_dict(Furniture.MATERIAL)
-    furniture_styles = choice_list_to_dict(Furniture.STYLES)
-    purposes = list(Purpose.objects.all().values())
-    # order_statuses = choice_list_to_dict(Order.STATUSES)
+    tags = list(Tags.objects.all().values())
+    furniture_categories = list(FurnitureCategory.objects.all().values())
+
     filter_items = [
-        {'name': 'Типы мебели', 'options': furniture_types},
-        {'name': 'Формы', 'options': furniture_forms},
-        {'name': 'Материалы столешниц', 'options': tabletop_materials},
-        {'name': 'Материалы фасадов', 'options': furniture_materials},
-        {'name': 'Стили', 'options': furniture_styles},
-        {'name': 'Назначения', 'options': purposes},
-        # {'name': 'Статусы доставок', 'options': order_statuses},
+        {'name': 'Все теги', 'options': tags},
+        {'name': 'Все категории', 'options': furniture_categories},
     ]
 
     return JsonResponse({'filter_items': filter_items})

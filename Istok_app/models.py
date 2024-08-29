@@ -57,116 +57,52 @@ class ProjectImage(models.Model):
         return new_name
 
 
-class Purpose(models.Model):
-    name = models.CharField(max_length=60, unique=True)
-
-
-    def __str__(self):
-        return f"id={self.pk}, Назначение={self.name}"
-
-    class Meta:
-        verbose_name = "Назначение мебели"
-        verbose_name_plural = "Назначения мебели"
-
-
 class Tags(models.Model):
-    name = models.CharField(max_length=40, unique=True)
+    name = models.CharField(max_length=150, unique=True, verbose_name='Название')
     highlight = models.BooleanField(default=False, verbose_name='Визуальное выделение')
 
     def __str__(self):
-        return f'{self.name} Подсветка: {self.highlight}'
+        return f'{self.name}(id {self.pk}) Подсветка: {self.highlight}'
 
     class Meta:
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
 
 
-class Description(models.Model):
-    part_number = models.PositiveIntegerField(verbose_name='Порядковый номер части текста')
-    text = models.TextField(default='Нет описание мебели', verbose_name='Описание мебели')
+class FurnitureCategory(models.Model):
+
+    name = models.CharField(max_length=150, verbose_name='Название категории')
 
 
     def __str__(self):
-        return f"(id={self.pk}){self.text[0:20]}..."
+        return f'Категория - {self.name}'
+
 
     class Meta:
-        verbose_name = "Текст"
-        verbose_name_plural = "Тексты"
+        verbose_name = "Категория готовой мебели"
+        verbose_name_plural = "Категории готовой мебели"
+
 
 
 class Furniture(models.Model):
 
-    TYPES = [
-        ('1', 'Кухня'),
-        ('2', 'Гардероб'),
-        ('3', 'Стол'),
-        ('4', 'Комод'),
-        ('5', 'Тумбочка'),
-        ('6', 'Шкаф'),
-        ('7', 'Прихожая'),
-        ('8', 'Системы хранения'),
-        ('9', 'Стеллаж'),
-    ]
-
-    FORMS = [
-        ('0', 'Нет данных'),
-        ('1', 'Прямая'),
-        ('2', 'Г-образная'),
-        ('3', 'П-образная'),
-        ('4', 'С барной стойкой'),
-        ('5', 'С островом'),
-    ]
-
-    MATERIAL = [
-        ('1', 'ЛДСП'),
-        ('2', 'МДФ'),
-        ('3', 'Пленка ПВХ'),
-        ('4', 'Пластик AGT'),
-        ('5', 'Пластик Fenix'),
-        ('6', 'Эмаль'),
-    ]
-
-    STYLES = [
-        ('1', 'Классика'),
-        ('2', 'Современный'),
-        ('3', 'Лофт'),
-        ('4', 'Скандинавский'),
-        ('5', 'Минимализм'),
-        ('6', 'Хай-тек'),
-        ('7', 'Прованс'),
-        ('8', 'Кантри'),
-    ]
-
-    TABLETOP_MATERIAL = [
-        ('1', 'Столешница ДСП с покрытием HPL'),
-        ('2', 'Столешница компакт-ламинат'),
-        ('3', 'Кварцевая столешница'),
-        ('4', 'Акриловая столешница'),
-        ('5', 'Пластик Fenix')
-    ]
-
+    category = models.ForeignKey(FurnitureCategory, on_delete=models.CASCADE, verbose_name='Категория мебели')
     name = models.CharField(max_length=150, verbose_name='Название')
-    type = models.CharField(max_length=2, choices=TYPES, default='1', verbose_name='Тип мебели')
-    form = models.CharField(max_length=2, choices=FORMS, default='1', verbose_name='Форма мебели')
-    style = models.CharField(max_length=2, choices=STYLES, default='1', verbose_name='Стиль мебели')
-    body_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал корпуса')
-    facades_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал фасадов')
-    tabletop_material = models.CharField(max_length=2, choices=TABLETOP_MATERIAL, default='1', verbose_name='Материал столешницы')
-    price = models.PositiveIntegerField(verbose_name='Стоимость', default=1)
-    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    text = models.TextField(verbose_name='Описание мебели')
-    
     tags = models.ManyToManyField(Tags, through='FurnitureTags', related_name='tags',
         verbose_name='Теги')
-    purposes = models.ManyToManyField(Purpose, through='FurniturePurpose', related_name='purposes',
-        verbose_name='Назначения')
+    text = models.TextField(verbose_name='Описание мебели')
+    price = models.PositiveIntegerField(verbose_name='Стоимость', default=1)
     images = models.ManyToManyField(ProjectImage, through='FurnitureImage', related_name='furniture_images',
         verbose_name='Изображения')
+    #todo 3д доделать
+    model_3d = models.CharField(null=True, blank=True, default='В РАЗРАБОТКЕ', max_length=20000,
+        verbose_name='3D модель готовой мебели')
+    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
 
     class Meta:
         verbose_name = "Мебель"
-        verbose_name_plural = "Вся мебель"
+        verbose_name_plural = "Готовая мебель для ознакомления"
 
 
     def get_tags(self):
@@ -234,6 +170,7 @@ class Order(models.Model):
         verbose_name='3D модель')
     images = models.ManyToManyField(ProjectImage, through='OrderImage', related_name='order_images',
         verbose_name='Изображение заказа')
+
     #todo дополнительные документы и перечни.
     # additional_info =
 
@@ -248,54 +185,6 @@ class Order(models.Model):
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
 
-
-####### Промежуточные таблицы для ManyToMany
-class FurnitureTags(models.Model):
-    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.furniture}: {self.tag}'
-
-    class Meta:
-        verbose_name = "Тег мебели"
-        verbose_name_plural = "Теги для мебели"
-
-class FurniturePurpose(models.Model):
-    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
-    purpose = models.ForeignKey(Purpose, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.furniture}| Назначение: {self.purpose}'
-
-    class Meta:
-        verbose_name = "Заказ"
-        verbose_name_plural = "Заказы"
-
-class FurnitureImage(models.Model):
-    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
-    project_image = models.ForeignKey(ProjectImage, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Мебель({self.furniture.pk}) Изображение(id={self.project_image.pk})={self.project_image.image.path}'
-
-    class Meta:
-        verbose_name = "Изображение для мебели"
-        verbose_name_plural = "Изображения для мебели"
-
-class OrderImage(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    order_image = models.ForeignKey(ProjectImage, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Номер заказа - {self.order.pk} | Название изображения - {self.order_image.image.name}'
-
-    class Meta:
-        verbose_name = "Изображение для заказа"
-        verbose_name_plural = "Изображения для заказа"
-
-
-#######
 
 
 class Application(models.Model):
@@ -330,6 +219,61 @@ class Application(models.Model):
         verbose_name_plural = "Заявки пользователей"
 
 
+####### Промежуточные таблицы для ManyToMany
+class FurnitureTags(models.Model):
+    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.furniture}: {self.tag}'
+
+    class Meta:
+        # Для уникальности м2м
+        constraints = [
+            models.UniqueConstraint(fields=['furniture', 'tag'], name='furniture_tag'),
+        ]
+        verbose_name = "Тег мебели"
+        verbose_name_plural = "Теги для мебели"
+
+
+class FurnitureImage(models.Model):
+    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
+    project_image = models.ForeignKey(ProjectImage, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Мебель({self.furniture.pk}) Изображение(id={self.project_image.pk})={self.project_image.image.path}'
+
+    class Meta:
+        verbose_name = "Изображение для мебели"
+        verbose_name_plural = "Изображения для мебели"
+
+class OrderImage(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order_image = models.ForeignKey(ProjectImage, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Номер заказа - {self.order.pk} | Название изображения - {self.order_image.image.name}'
+
+    class Meta:
+        verbose_name = "Изображение для заказа"
+        verbose_name_plural = "Изображения для заказа"
+
+
+#######
+
+
+# class Description(models.Model):
+#
+#     part_number = models.PositiveIntegerField(verbose_name='Порядковый номер части текста')
+#     text = models.TextField(default='Нет описание мебели', verbose_name='Описание мебели')
+#
+#
+#     def __str__(self):
+#         return f"(id={self.pk}){self.text[0:20]}..."
+#
+#     class Meta:
+#         verbose_name = "Текст"
+#         verbose_name_plural = "Тексты"
 
 
 #
@@ -372,3 +316,86 @@ class Application(models.Model):
 
 # from Istok_app.models import *
 
+
+
+# class Furniture(models.Model):
+#
+#     TYPES = [
+#         ('1', 'Кухня'),
+#         ('2', 'Гардероб'),
+#         ('3', 'Комоды'),
+#         ('4', 'Комод'),
+#         ('5', 'Тумбочка'),
+#         ('6', 'Шкаф'),
+#         ('7', 'Прихожая'),
+#         ('8', 'Системы хранения'),
+#         ('9', 'Стеллаж'),
+#     ]
+#
+#     FORMS = [
+#         ('0', 'Нет данных'),
+#         ('1', 'Прямая'),
+#         ('2', 'Г-образная'),
+#         ('3', 'П-образная'),
+#         ('4', 'С барной стойкой'),
+#         ('5', 'С островом'),
+#     ]
+#
+#     MATERIAL = [
+#         ('1', 'ЛДСП'),
+#         ('2', 'МДФ'),
+#         ('3', 'Пленка ПВХ'),
+#         ('4', 'Пластик AGT'),
+#         ('5', 'Пластик Fenix'),
+#         ('6', 'Эмаль'),
+#     ]
+#
+#     STYLES = [
+#         ('1', 'Классика'),
+#         ('2', 'Современный'),
+#         ('3', 'Лофт'),
+#         ('4', 'Скандинавский'),
+#         ('5', 'Минимализм'),
+#         ('6', 'Хай-тек'),
+#         ('7', 'Прованс'),
+#         ('8', 'Кантри'),
+#     ]
+#
+#     TABLETOP_MATERIAL = [
+#         ('1', 'Столешница ДСП с покрытием HPL'),
+#         ('2', 'Столешница компакт-ламинат'),
+#         ('3', 'Кварцевая столешница'),
+#         ('4', 'Акриловая столешница'),
+#         ('5', 'Пластик Fenix')
+#     ]
+#
+#     name = models.CharField(max_length=150, verbose_name='Название')
+#     type = models.CharField(max_length=2, choices=TYPES, default='1', verbose_name='Тип мебели')
+#     form = models.CharField(max_length=2, choices=FORMS, default='1', verbose_name='Форма мебели')
+#     style = models.CharField(max_length=2, choices=STYLES, default='1', verbose_name='Стиль мебели')
+#     body_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал корпуса')
+#     facades_material = models.CharField(max_length=2, choices=MATERIAL, default='1', verbose_name='Материал фасадов')
+#     tabletop_material = models.CharField(max_length=2, choices=TABLETOP_MATERIAL, default='1',
+#         verbose_name='Материал столешницы')
+#     price = models.PositiveIntegerField(verbose_name='Стоимость', default=1)
+#     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+#     text = models.TextField(verbose_name='Описание мебели')
+#
+#     tags = models.ManyToManyField(Tags, through='FurnitureTags', related_name='tags',
+#         verbose_name='Теги')
+#     purposes = models.ManyToManyField(Purpose, through='FurniturePurpose', related_name='purposes',
+#         verbose_name='Назначения')
+#     images = models.ManyToManyField(ProjectImage, through='FurnitureImage', related_name='furniture_images',
+#         verbose_name='Изображения')
+#
+#     class Meta:
+#         verbose_name = "Мебель"
+#         verbose_name_plural = "Вся мебель"
+#
+#     def get_tags(self):
+#         tags = self.tags.all()
+#
+#         return ', '.join([tag.name for tag in tags])
+#
+#     def __str__(self):
+#         return f'{self.name}(id={self.pk})'

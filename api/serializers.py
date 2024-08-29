@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Istok_app.models import (Furniture, Tags, Purpose, Description, ProjectImage, News, Order, Application)
+from Istok_app import models
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -8,78 +8,48 @@ class TagsSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
 
     class Meta:
-        model = Tags
+        model = models.Tags
         fields = ['id', 'name', 'highlight']
 
 
-class PurposeSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
-
-    class Meta:
-        model = Purpose
-        fields = ['id', 'name']
-
-
-class ProjectImageSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
-
-    class Meta:
-        model = ProjectImage
-        fields = ['id', 'image', 'image_medium', 'image_small', 'only_one_image']
+# class ProjectImageSerializer(serializers.ModelSerializer):
+#     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
+#
+#     class Meta:
+#         model = models.ProjectImage
+#         fields = ['id', 'image', 'image_medium', 'image_small', 'only_one_image']
 
 
-class ProjectImageCreateSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
+# class ProjectImageCreateSerializer(serializers.ModelSerializer):
+#     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
+#
+#     class Meta:
+#         model = models.ProjectImage
+#         fields = ['id', 'image']
 
-    class Meta:
-        model = ProjectImage
-        fields = ['id', 'image']
 
-
-class ChoiceField(serializers.ChoiceField):
-    """Для отображения читаемой переменной из полей с прописанным выбором модели Furniture"""
-    def to_representation(self, obj):
-        if obj == '' and self.allow_blank:
-            return obj
-        return self._choices[obj]
-
-    def to_internal_value(self, data):
-        if data == '' and self.allow_blank:
-            return ''
-
-        for key, val in self._choices.items():
-            if val == data:
-                return key
-        self.fail('invalid_choice', input=data)
 
 
 class FurnitureListSerializer(serializers.ModelSerializer):
-    type = ChoiceField(choices=Furniture.TYPES)
-    form = ChoiceField(choices=Furniture.FORMS)
-    style = ChoiceField(choices=Furniture.STYLES)
-    body_material = ChoiceField(choices=Furniture.MATERIAL)
-    facades_material = ChoiceField(choices=Furniture.MATERIAL)
-    tabletop_material = ChoiceField(choices=Furniture.MATERIAL)
 
     class Meta:
-        model = Furniture
-        fields = ['id', 'name', 'type', 'form', 'style', 'body_material', 'facades_material',
-                  'tabletop_material', 'price', 'text', 'tags', 'purposes', 'images']
+        model = models.Furniture
+        fields = ['id', 'category', 'name', 'tags', 'text', 'price', 'images',
+                  'model_3d', 'time_created']
         depth = 1  # для полного отображения моделей M2M
 
 
 class NewsListSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = News
+        model = models.News
         fields = ['id', 'title', 'text', 'time_created', 'image']
-
 
 
 class OrdersListSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Order
+        model = models.Order
         fields = ['id', 'number', 'create_date', 'shipment_date', 'status', 'address', 'contract', 'images']
         depth = 1  # для полного отображения моделей M2M
 
@@ -87,7 +57,7 @@ class OrdersListSerializer(serializers.ModelSerializer):
 class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Application
+        model = models.Application
         fields = ['id', 'time_created', 'user', 'text', 'last_name', 'first_name', 'patronymic', 'phone',
                   'contact_type', 'link', 'date_time', 'python_date_time']
         # depth = 1  # для полного отображения моделей M2M
@@ -96,9 +66,40 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 
 
+##!! Пример использования своего класса для отображения выбора
+# class ChoiceField(serializers.ChoiceField):
+#     """Для отображения читаемой переменной из полей с прописанным выбором модели Furniture"""
+#     def to_representation(self, obj):
+#         if obj == '' and self.allow_blank:
+#             return obj
+#         return self._choices[obj]
+#
+#     def to_internal_value(self, data):
+#         if data == '' and self.allow_blank:
+#             return ''
+#
+#         for key, val in self._choices.items():
+#             if val == data:
+#                 return key
+#         self.fail('invalid_choice', input=data)
+
+# class FurnitureListSerializer(serializers.ModelSerializer):
+#     type = ChoiceField(choices=Furniture.TYPES)
+#     form = ChoiceField(choices=Furniture.FORMS)
+#     style = ChoiceField(choices=Furniture.STYLES)
+#     body_material = ChoiceField(choices=Furniture.MATERIAL)
+#     facades_material = ChoiceField(choices=Furniture.MATERIAL)
+#     tabletop_material = ChoiceField(choices=Furniture.MATERIAL)
+#
+#     class Meta:
+#         model = Furniture
+#         fields = ['id', 'name', 'type', 'form', 'style', 'body_material', 'facades_material',
+#                   'tabletop_material', 'price', 'text', 'tags', 'purposes', 'images']
+#         depth = 1  # для полного отображения моделей M2M
 
 
-#todo разобраться с валидациями
+
+
 
 # class FurnitureListSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)

@@ -9,13 +9,13 @@ class CharFilterInFilter(filters.CharFilter, filters.BaseInFilter):
 
 
 class FurnitureFilter(filters.FilterSet):
-    tags = CharFilterInFilter(field_name='tags__id', lookup_expr='in')
+    tags_name = filters.CharFilter(field_name='tags__name', lookup_expr='icontains')
     min_price = filters.NumberFilter(field_name="price", lookup_expr='gte')
     max_price = filters.NumberFilter(field_name="price", lookup_expr='lte')
-    purposes = CharFilterInFilter(field_name='purposes__id', lookup_expr='in')
 
 
     class Meta:
         model = Furniture
-        fields = ['min_price', 'max_price', 'tags', 'purposes', 'style', 'facades_material', 'form']
+        fields = ['min_price', 'max_price', 'tags_name', 'category', 'tags']
+
 

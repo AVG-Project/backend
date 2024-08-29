@@ -4,7 +4,7 @@ from Istok_app import models
 
 
 
-istok_app_models = [models.Tags, models.Purpose, models.News, models.ProjectImage, models.Application]
+istok_app_models = [models.Tags, models.News, models.ProjectImage, models.Application, models.FurnitureCategory]
 
 admin.site.register(istok_app_models)
 
@@ -22,9 +22,6 @@ admin.site.register(istok_app_models)
 #         FurnitureInline,
 #     ]
 
-class PurposeInstanceInline(admin.TabularInline):
-    model = models.FurniturePurpose
-
 class TagsInstanceInline(admin.TabularInline):
     model = models.FurnitureTags
 
@@ -35,8 +32,8 @@ class ImageInstanceInline(admin.TabularInline):
 @admin.register(models.Furniture)
 class FurnitureAdmin(admin.ModelAdmin):
     model = models.Furniture
-    list_display = ['name', 'id', 'type', "get_tags"]
-    inlines = [PurposeInstanceInline, TagsInstanceInline, ImageInstanceInline]
+    list_display = ['category', 'name', 'id', "get_tags"]
+    inlines = [TagsInstanceInline, ImageInstanceInline]
 
 
 class OrderImagesInline(admin.TabularInline):

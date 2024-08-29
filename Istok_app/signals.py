@@ -23,6 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist
 #                 if order_user != loyalty.user:
 #                     loyalty.increase_balance(instance.order_price)
 
+
 # @receiver(post_save, sender=Application)
 # def send_application_email(sender, instance, created, **kwargs):
 #     if created:
