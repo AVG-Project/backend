@@ -2,8 +2,9 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags, News, Order, Application, FurnitureCategory
-from .serializers import FurnitureListSerializer, NewsListSerializer, OrdersListSerializer, ApplicationSerializer
+from Istok_app.models import Furniture, Tags, News, Order, Application, FurnitureCategory, Question, Survey
+from .serializers import FurnitureListSerializer, NewsListSerializer, OrdersListSerializer,\
+    ApplicationSerializer, QuestionSerializer, SurveySerializer
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -61,12 +62,7 @@ def variables(request):
     tags = list(Tags.objects.all().values())
     furniture_categories = list(FurnitureCategory.objects.all().values())
 
-    filter_items = [
-        {'name': 'Все теги', 'options': tags},
-        {'name': 'Все категории', 'options': furniture_categories},
-    ]
-
-    return JsonResponse({'filter_items': filter_items})
+    return JsonResponse({'all_tags': tags, 'all_categories': furniture_categories})
 
 
 class NewsList(mixins.ListModelMixin,
@@ -119,6 +115,50 @@ class ApplicationsList(mixins.ListModelMixin,
         if not pk:
             return Application.objects.all().order_by('-time_created')
         return Application.objects.filter(pk=pk)
+
+
+#### Опросник и Анкета
+class SurveysList(
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = SurveySerializer
+    ordering = ['-time_created']
+
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk', None)
+        if not pk:
+            return Survey.objects.all().order_by('-time_created')
+        return Survey.objects.filter(pk=pk)
+
+
+class QuestionsList(mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = QuestionSerializer
+    ordering = ['id']
+
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk', None)
+        if not pk:
+            return Question.objects.all().order_by('id')
+        return Question.objects.filter(pk=pk)
+
+#### Опросник и Анкета
+
+
+
+
+
+
 
 
 

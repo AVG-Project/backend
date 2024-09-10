@@ -219,6 +219,127 @@ class Application(models.Model):
         verbose_name_plural = "Заявки пользователей"
 
 
+
+
+
+
+#### Survey Опросник с готовыми ответами
+class Answer(models.Model):
+    text = models.TextField(verbose_name='Ответ')
+    user_answer = models.BooleanField(default=False, verbose_name='Ответ написан пользователем',
+        help_text='Если True, то вариант был написан пользователем', blank=False)
+
+
+    class Meta:
+        verbose_name = "(Тех)Answer"
+        verbose_name_plural = "(Тех)Answers"
+
+    def __str__(self):
+        return f'Ответ({self.pk}) - {self.text}'
+
+
+class QuestionAndAnswer(models.Model):
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, verbose_name='Вопрос')
+    answers = models.ManyToManyField('Answer', through='AnswerQuestionAndAnswer',
+        related_name='answers')
+    # user_answer = models.BooleanField(default=False, verbose_name='Ответ написан пользователем',
+    #     help_text='Если True, то вариант не был написан пользователем')
+
+
+    class Meta:
+        verbose_name = "(Тех)QuestionAndAnswer"
+        verbose_name_plural = "(Тех)QuestionAndAnswers"
+
+    def __str__(self):
+        return f'Вопрос-ответ({self.pk}) {self.question}'
+
+
+# Many_to_many
+class AnswerQuestionAndAnswer(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    question_and_answer = models.ForeignKey('QuestionAndAnswer', on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return f'({self.pk} Вопрос-{self.question_and_answer.question} Ответ-{self.answer.text}'
+
+    class Meta:
+        verbose_name = "(m2m)AnswerQuestionAndAnswer"
+        verbose_name_plural = "(m2m)AnswerQuestionAndAnswers"
+
+
+class Survey(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    # user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Пользователь', null=True, blank=True)
+    question_and_answers = models.ManyToManyField(QuestionAndAnswer, through='SurveyQuestionAndAnswer',
+        related_name='question_and_answers', blank=False)
+    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата опроса')
+
+    def __str__(self):
+        return f'({self.pk})|User={self.user.pk}'
+
+    class Meta:
+        verbose_name = "Опрос пользователя"
+        verbose_name_plural = "Опросы пользователей"
+
+
+# Many_to_many
+class SurveyQuestionAndAnswer(models.Model):
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    question_and_answer = models.ForeignKey(QuestionAndAnswer, on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return f'({self.pk} Опрос({self.survey.pk})'
+
+    class Meta:
+        verbose_name = "(m2m)Ответ на вопрос"
+        verbose_name_plural = "(m2m)Ответы на вопросы"
+#### Survey Опросник с готовыми ответами
+
+
+
+#### Question Вопросы для опросника
+
+class Option(models.Model):
+    text = models.CharField(max_length=200, verbose_name='Текст варианта ответа')
+    user_input = models.BooleanField(default=False, verbose_name='Вариант пользователя',
+        help_text='Если True, пользователь сможет ввести свой вариант ответа')
+
+    def __str__(self):
+        return f'({self.pk}) {self.text})'
+
+    class Meta:
+        verbose_name = "(Тех)Option"
+        verbose_name_plural = "(Тех)Options"
+
+
+class Question(models.Model):
+    text = models.TextField(verbose_name='Вопрос')
+    options = models.ManyToManyField(Option, through='QuestionOption', related_name='options')
+    multy_choice = models.BooleanField(default=False, verbose_name='Выбрать несколько ответов',
+        help_text='При включении этой опции позволяет опрашиваемому выбрать несколько вариантов')
+
+    def __str__(self):
+        return f'({self.pk}){self.text}'
+
+    class Meta:
+        verbose_name = "Вопрос с вариантами ответа"
+        verbose_name_plural = "Вопросы с вариантами ответа"
+
+
+class QuestionOption(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    option = models.ForeignKey(Option, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'({self.pk} Вопрос({self.question.pk})/Ответ({self.option.pk}))'
+
+
+#### Question Вопросы для опросника
+
+
+
 ####### Промежуточные таблицы для ManyToMany
 class FurnitureTags(models.Model):
     furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
@@ -266,8 +387,7 @@ class OrderImage(models.Model):
         verbose_name_plural = "Изображения для заказа"
 
 
-#######
-
+####### Старое
 
 # class Description(models.Model):
 #
@@ -283,11 +403,6 @@ class OrderImage(models.Model):
 #         verbose_name_plural = "Тексты"
 
 
-#
-#
-#
-#
-#
 # class Parts(models.Model):
 #
 #     PARTS_TYPE = [

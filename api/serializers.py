@@ -64,12 +64,118 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 
 
+#### Сериализаторы Опросника
+class OptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Option
+        fields = ['id', 'text', 'user_input']
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = OptionSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Question
+        fields = ['id', 'text', 'multy_choice', 'options']
+        depth = 1  # для полного отображения моделей M2M
+
+
+class ExtraQuestionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Question
+        fields = ['id', 'text']
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Answer
+        fields = ['id', 'text', 'user_answer']
+
+
+class QuestionAndAnswerSerializer(serializers.ModelSerializer):
+    question = ExtraQuestionSerializer(read_only=False, many=False)
+    answers = AnswerSerializer(read_only=False, many=True)
+
+    class Meta:
+        model = models.QuestionAndAnswer
+        fields = ['id', 'question', 'answers']
+        depth = 1  # для полного отображения моделей M2M
+
+
+class SurveySerializer(serializers.ModelSerializer):
+    question_and_answers = QuestionAndAnswerSerializer(read_only=True, many=True)
+    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = models.Survey
+        fields = ['id', 'user', 'question_and_answers']
+        # depth = 1  # для полного отображения моделей M2M
+
+
+
+    def create(self, validated_data):
+        question_and_answers = self.initial_data.pop('question_and_answers')
+        question_and_answers_list = []
+
+        for obj in question_and_answers:
+            answers = []
+            for answer_obj in obj['answers']:
+                new_answer = models.Answer.objects.create(text=answer_obj['text'],
+                    user_answer=answer_obj['user_answer'])
+                answers.append(new_answer)
+
+            new = models.QuestionAndAnswer.objects.create(question_id=obj['question'])
+            new.answers.set(answers)
+            question_and_answers_list.append(new)
+
+        instance = models.Survey.objects.create(user=validated_data.pop('user'))
+        instance.question_and_answers.set(question_and_answers_list)
+
+        return instance
+
+    # {
+    #     "user": 1,
+    #     "question_and_answers": [
+    #         {
+    #             "question": 1,
+    #             "answers": [
+    #                 {"text": "Диван", "user_answer": false},
+    #                 {"text": "Кровать", "user_answer": false},
+    #                 {"text": "Свой вариант", "user_answer": true}
+    #             ]
+    #         },
+    #
+    #         {
+    #             "question": 3,
+    #             "answers": [
+    #                 {"text": "Реклама в интернете", "user_answer": false},
+    #                 {"text": "Я его создаю", "user_answer": true}
+    #             ]
+    #         }
+    #     ]
+    # }
+
+    # def to_representation(self, instance):
+    #     representation = super(EquipmentSerializer, self).to_representation(instance)
+    #     representation['assigment'] = AssignmentSerializer(instance.assigment_set.all(), many=True).data
+    #     return representation
+
+#### Сериализаторы Опросника
+
+
+
 
 
 ##!! Пример использования своего класса для отображения выбора
 # class ChoiceField(serializers.ChoiceField):
 #     """Для отображения читаемой переменной из полей с прописанным выбором модели Furniture"""
 #     def to_representation(self, obj):
+
+
+  
 #         if obj == '' and self.allow_blank:
 #             return obj
 #         return self._choices[obj]
@@ -123,10 +229,10 @@ class ApplicationSerializer(serializers.ModelSerializer):
 #     images = ProjectImageSerializer(many=True, read_only=True)
 
 
-    ####
-    # пример автозаполнения поля создателя
-    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    ####
+##!!
+# пример автозаполнения поля создателя
+# user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+##!!
 
 
 
