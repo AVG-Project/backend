@@ -1,6 +1,11 @@
 from datetime import datetime
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+import string
+
+
+# uc_letters = [chr(i) for i in range(sys.maxunicode) if chr(i).isupper()]
+# print(uc_letters)
 
 phone_regex = RegexValidator(
         regex=r'^\+?1?\d{10,12}$',
@@ -21,9 +26,20 @@ def no_number_in_name(value):
             params={"value": value},
         )
 
-# def mobile_number_min_len(value):
-#     if len(value) != 12:
-#         raise ValidationError(
-#             'Телефон должен быть указан в формате: +7ХХХХХХХХХХ (12 символов).',
-#             params={"value": value},
-#         )
+def code_validation(code):
+    min_5 = (len(code) == 5)
+    check_str = string.ascii_uppercase + '0123456789'
+    if not min_5:
+        raise ValidationError(
+            'Код лояльности должен содержать 5 символов\т'
+            'Формат: FS6B2',
+            params={"code": code},
+        )
+
+    for symbol in code:
+        if symbol not in check_str:
+            raise ValidationError(
+                'Код лояльности должен быть указан в формате: FS6B2\n'
+                'Цифры и заглавные латински буквы.',
+                params={"code": code})
+

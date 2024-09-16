@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from Istok_app import models
+from users import models as users_models
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -135,6 +136,70 @@ class SurveySerializer(serializers.ModelSerializer):
         instance.question_and_answers.set(question_and_answers_list)
 
         return instance
+#### Сериализаторы Опросника
+
+
+#### Loyalty Benefit Offer(User_app)
+class BenefitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = users_models.Benefit
+        fields = ['id', 'title', 'about']
+
+
+class LoyaltyBenefitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = users_models.LoyaltyBenefit
+        fields = ['id', 'loyalty', 'benefit']
+
+
+class OfferSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = users_models.Offer
+        fields = ['id', 'title', 'about', 'offer_to_all']
+
+
+class LoyaltySerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = users_models.Loyalty
+        fields = ['user_id', 'card_number', 'show_user_name', 'balance', 'balance_history', 'code', 'benefits_history',
+                  'offers', 'new_befit']
+        depth = 1
+
+    def to_representation(self, instance):
+        ret = super(LoyaltySerializer, self).to_representation(instance)
+        offer_to_all = users_models.Offer.objects.filter(offer_to_all=True)
+        ret['offers'] = ret['offers'] + OfferSerializer(offer_to_all, many=True).data
+        ret['benefits'] = BenefitSerializer(users_models.Benefit.objects.all(), many=True).data
+        return ret
+
+
+#### Loyalty Benefit (User_app)
+
+
+
+
+
+
+
+
+
+
+# class LoyaltySerializer(serializers.ModelSerializer):
+#     question_and_answers = QuestionAndAnswerSerializer(read_only=True, many=True)
+#
+#     # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+#
+#     class Meta:
+#         model = models.Survey
+#         fields = ['id', 'user', 'balance' 'bonus' 'balance' 'balance' 'balance' 'balance' 'balance']
+#         # depth = 1  # для полного отображения моделей M2M
+
+
 
     # {
     #     "user": 1,

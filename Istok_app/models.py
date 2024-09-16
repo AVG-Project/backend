@@ -274,6 +274,11 @@ class Survey(models.Model):
     question_and_answers = models.ManyToManyField(QuestionAndAnswer, through='SurveyQuestionAndAnswer',
         related_name='question_and_answers', blank=False)
     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата опроса')
+    survey_was_changed = models.BooleanField(default=False, verbose_name='Опросник был изменен',
+        help_text='Данный статус автоматически изменяется если были изменения в опроснике'
+                  '(как случай, добавление новых вопросов)\n'
+                  'Если есть новые вопросы пользователь должен будет вновь пройти опрос')
+    survey_filling_duration = models.PositiveIntegerField(verbose_name='Длительность заполнения опросника.', default=0)
 
     def __str__(self):
         return f'({self.pk})|User={self.user.pk}'
@@ -319,6 +324,8 @@ class Question(models.Model):
     options = models.ManyToManyField(Option, through='QuestionOption', related_name='options')
     multy_choice = models.BooleanField(default=False, verbose_name='Выбрать несколько ответов',
         help_text='При включении этой опции позволяет опрашиваемому выбрать несколько вариантов')
+
+
 
     def __str__(self):
         return f'({self.pk}){self.text}'

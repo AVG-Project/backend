@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from Istok_app import models
 
 

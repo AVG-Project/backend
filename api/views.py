@@ -3,12 +3,14 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
 from Istok_app.models import Furniture, Tags, News, Order, Application, FurnitureCategory, Question, Survey
+from users.models import Loyalty, Benefit
 from .serializers import FurnitureListSerializer, NewsListSerializer, OrdersListSerializer,\
-    ApplicationSerializer, QuestionSerializer, SurveySerializer
+    ApplicationSerializer, QuestionSerializer, SurveySerializer, LoyaltySerializer, BenefitSerializer, \
+    LoyaltyBenefitSerializer
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, metadata, mixins
@@ -20,6 +22,8 @@ from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import FurnitureFilter
 from rest_framework.filters import OrderingFilter  # если импортировать по другому будет ошибка
+from rest_framework import serializers
+from django.http import Http404, HttpResponseForbidden
 
 
 class FurniturePagination(PageNumberPagination):
@@ -155,7 +159,60 @@ class QuestionsList(mixins.ListModelMixin,
 #### Опросник и Анкета
 
 
+#### Loyalty Benefit
 
+class LoyaltyDetail(mixins.ListModelMixin,
+                    # mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = LoyaltySerializer
+    permission_classes = (IsAuthenticated,)
+    
+    # def get_object(self):
+    #     obj = super(LoyaltyDetail, self).get_object()
+    #     print(obj)
+    #     return obj
+    #
+    # def get_object(self):
+    #     print(self.request.user.pk)
+    #     return self.request.user
+
+
+    def get_queryset(self):
+        # pk = self.kwargs.get('pk', None)
+        pk = self.request.user.pk
+        # if pk is None:
+        #     raise Http404
+        print('self.request.user.pk == ', self.request.user.pk)
+        # user = serializers.CurrentUserDefault()
+        # print(user)
+        return Loyalty.objects.filter(pk=pk)
+
+
+class LoyaltyBenefitCreate(  # mixins.ListModelMixin,
+                    # mixins.RetrieveModelMixin,
+                    mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = LoyaltyBenefitSerializer
+
+
+
+class BenefitList(mixins.ListModelMixin,
+                # mixins.RetrieveModelMixin,
+                # mixins.CreateModelMixin,
+                # mixins.UpdateModelMixin,
+                viewsets.GenericViewSet):
+
+    serializer_class = BenefitSerializer
+
+    def get_queryset(self):
+        return Benefit.objects.all().order_by('id')
+
+#### Loyalty Benefit
 
 
 
