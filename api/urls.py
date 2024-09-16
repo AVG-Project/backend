@@ -12,7 +12,7 @@ router.register(r'questions_list', views.QuestionsList, basename='questions_list
 router.register(r'surveys_list', views.SurveysList, basename='surveys_list')
 router.register(r'loyalty_detail', views.LoyaltyDetail, basename='loyalty_detail')
 router.register(r'loyalty_benefit_create', views.LoyaltyBenefitCreate, basename='loyalty_benefit_create')
-router.register(r'benefit_list', views.BenefitList, basename='benefit_list')
+# router.register(r'benefit_list', views.BenefitList, basename='benefit_list')
 
 
 

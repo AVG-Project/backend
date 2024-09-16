@@ -174,7 +174,7 @@ class LoyaltySerializer(serializers.ModelSerializer):
         ret = super(LoyaltySerializer, self).to_representation(instance)
         offer_to_all = users_models.Offer.objects.filter(offer_to_all=True)
         ret['offers'] = ret['offers'] + OfferSerializer(offer_to_all, many=True).data
-        ret['benefits'] = BenefitSerializer(users_models.Benefit.objects.all(), many=True).data
+        ret['all_benefits'] = BenefitSerializer(users_models.Benefit.objects.all(), many=True).data
         return ret
 
 

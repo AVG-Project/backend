@@ -17,3 +17,4 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
         #! Если у объекта есть поле создателя
         return obj.user == request.user
+
