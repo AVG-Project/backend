@@ -9,7 +9,17 @@ istok_app_models = [models.Tags, models.News, models.ProjectImage, models.Applic
 admin.site.register(istok_app_models)
 
 
+@admin.register(models.WebsiteSettings)
+class WebsiteSettingsAdmin(admin.ModelAdmin):
+    model = models.WebsiteSettings
+    list_display = ['name']
 
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 # class FurnitureInline(admin.TabularInline):
 #     model = Furniture.tags.through
@@ -29,11 +39,16 @@ class TagsInstanceInline(admin.TabularInline):
 class ImageInstanceInline(admin.TabularInline):
     model = models.FurnitureImage
 
+class SimilarFurnitureInline(admin.TabularInline):
+    model = models.SimilarFurniture
+    fk_name = 'instance_furniture'
+
+
 @admin.register(models.Furniture)
 class FurnitureAdmin(admin.ModelAdmin):
     model = models.Furniture
     list_display = ['category', 'name', 'id', "get_tags"]
-    inlines = [TagsInstanceInline, ImageInstanceInline]
+    inlines = [TagsInstanceInline, ImageInstanceInline, SimilarFurnitureInline]
 #### Furniture
 
 
@@ -68,20 +83,37 @@ class AnswerQuestionAndAnswerInline(admin.TabularInline):
 @admin.register(models.QuestionAndAnswer)
 class QuestionAndAnswerAdmin(admin.ModelAdmin):
     model = models.QuestionAndAnswer
-    list_display = ['question', 'id']
+    list_display = ['survey', 'question', 'id']
     inlines = [AnswerQuestionAndAnswerInline]
 #### QuestionAndAnswer
 
 
 #### Survey
-class SurveyQuestionAndAnswerInline(admin.TabularInline):
-    model = models.SurveyQuestionAndAnswer
+# class QuestionAndAnswerInline(admin.TabularInline):
+#     model = models.QuestionAndAnswer
 
 @admin.register(models.Survey)
 class SurveyAdmin(admin.ModelAdmin):
     model = models.Survey
-    list_display = ['user', 'id', 'time_created']
-    inlines = [SurveyQuestionAndAnswerInline]
+    list_display = ['user', 'time_created', 'show_info']
+
+    # def save_model(self, request, obj, form, change):
+    #     """
+    #     Given a model instance save it to the database.
+    #     """
+    #     update_fields = set()
+    #     if change:
+    #         for key, value in form.cleaned_data.items():
+    #             # assuming that you have ManyToMany fields that are called groups and user_permissions
+    #             # we want to avoid adding them to update_fields
+    #             if key in ['user_permissions', 'groups']:
+    #                 continue
+    #             if value != form.initial[key]:
+    #                 update_fields.add(key)
+    #
+    #     obj.save(update_fields=update_fields)
+        
+        
 #### Survey
 
 

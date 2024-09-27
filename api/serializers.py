@@ -2,7 +2,17 @@ from rest_framework import serializers
 from Istok_app import models
 from users import models as users_models
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, exceptions
+from django.shortcuts import get_object_or_404
+from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
+
+
+
+#### Exceptions
+class SurveyEditException(exceptions.APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'Проверьте наличие и правильность вводимых полей'
+#### Exceptions
 
 
 class TagsSerializer(serializers.ModelSerializer):
@@ -29,15 +39,41 @@ class TagsSerializer(serializers.ModelSerializer):
 #         fields = ['id', 'image']
 
 
-
-
 class FurnitureListSerializer(serializers.ModelSerializer):
+    # recommendations = ExtraFurnitureListSerializer(read_only=True, many=True)
 
     class Meta:
         model = models.Furniture
         fields = ['id', 'category', 'name', 'tags', 'text', 'price', 'images',
                   'model_3d', 'time_created']
         depth = 1  # для полного отображения моделей M2M
+
+    # def to_representation(self, instance):
+    #
+    #     print('def to_representation\n')
+    #     ret = super(FurnitureListSerializer, self).to_representation(instance)
+    #     recommendations = self.instance.recommendations.all()
+    #     default_rec_len = recommendations.count()
+    #     lack_of_rec = 3 - default_rec_len
+    #     if lack_of_rec <= 0:
+    #         ret['recommendations'] = ExtraFurnitureListSerializer(recommendations, many=True).data
+    #     if lack_of_rec > 0:
+    #         auto_recommendations = self.instance.get_similar(num=lack_of_rec)
+    #         recommendations = recommendations.union(auto_recommendations)
+    #         ret['recommendations'] = ExtraFurnitureListSerializer(recommendations.order_by('-id'), many=True).data
+    #
+    #     return ret
+
+
+class ExtraFurnitureListSerializer(serializers.ModelSerializer):
+    recommendations = FurnitureListSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Furniture
+        fields = ['id', 'category', 'name', 'tags', 'text', 'price', 'images',
+                  'model_3d', 'time_created', 'recommendations']
+        depth = 1  # для полного отображения моделей M2M
+
 
 
 class NewsListSerializer(serializers.ModelSerializer):
@@ -93,7 +129,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Answer
-        fields = ['id', 'text', 'user_answer']
+        fields = ['text', 'user_answer']
 
 
 class QuestionAndAnswerSerializer(serializers.ModelSerializer):
@@ -108,34 +144,126 @@ class QuestionAndAnswerSerializer(serializers.ModelSerializer):
 
 class SurveySerializer(serializers.ModelSerializer):
     question_and_answers = QuestionAndAnswerSerializer(read_only=True, many=True)
-    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    dependable = serializers.BooleanField(required=True, label='Опросник надежен',
+        help_text='Статус становится положительным в случае если опросник заполняли '
+                  'больше минимального времени заполнения. При аналитике ненадежные будут вычеркиваться из выборки')
 
     class Meta:
         model = models.Survey
-        fields = ['id', 'user', 'question_and_answers']
+        fields = ['user', 'questions_was_changed', 'dependable', 'question_and_answers']
         # depth = 1  # для полного отображения моделей M2M
 
-
+    def to_representation(self, instance):
+        ret = super(SurveySerializer, self).to_representation(instance)
+        question_and_answers = instance.questionandanswer_set.all()
+        ret['question_and_answers'] = QuestionAndAnswerSerializer(question_and_answers, many=True).data
+        return ret
 
     def create(self, validated_data):
-        question_and_answers = self.initial_data.pop('question_and_answers')
-        question_and_answers_list = []
+        user = self.validated_data.pop('user')
+
+        try:
+            dependable = validated_data.pop('dependable')
+            instance = models.Survey.objects.create(user=user, dependable=dependable)
+            question_and_answers = self.initial_data.pop('question_and_answers')
+        except Exception:
+            raise Http404("Возможные ошибки:\n"
+                          "Опросник данного пользователя уже существует.\n"
+                          "Отсутствует поле question_and_answers.\n"
+                          "Отсутствует поле dependable.")
 
         for obj in question_and_answers:
             answers = []
             for answer_obj in obj['answers']:
-                new_answer = models.Answer.objects.create(text=answer_obj['text'],
-                    user_answer=answer_obj['user_answer'])
+                try:
+                    text = answer_obj['text']
+                    if not text:
+                        raise Http404
+
+                    user_answer = answer_obj['user_answer']
+                except Exception:
+                    raise Http404('Проверьте наличие полей text, user_answer')
+
+                answer_lst = models.Answer.objects.filter(text=text)
+                if answer_lst.exists():
+                    new_answer = answer_lst.first()
+                else:
+                    new_answer = models.Answer.objects.create(text=text, user_answer=user_answer)
                 answers.append(new_answer)
 
-            new = models.QuestionAndAnswer.objects.create(question_id=obj['question'])
-            new.answers.set(answers)
-            question_and_answers_list.append(new)
+            try:
+                question_id = obj['question']['id']
+            except Exception:
+                raise Http404('Отсутствует ключ question, id у answers')
 
-        instance = models.Survey.objects.create(user=validated_data.pop('user'))
-        instance.question_and_answers.set(question_and_answers_list)
+
+            new = models.QuestionAndAnswer.objects.filter(survey=instance, question=question_id)
+            if new.exists():
+                new = new.first()
+                new.answers.set(answers)
+            else:
+                new = models.QuestionAndAnswer.objects.create(survey=instance, question_id=obj['question']['id'])
+                new.answers.set(answers)
 
         return instance
+
+
+    def update(self, instance, validated_data):
+
+        try:
+            dependable = validated_data.pop('dependable')
+            models.Survey.objects.update(dependable=dependable)
+            question_and_answers = self.initial_data.pop('question_and_answers')
+        except Exception:
+            raise Http404("Возможные ошибки: "
+                          "Отсутствует поле question_and_answers. "
+                          "Отсутствует поле dependable.")
+
+        for obj in question_and_answers:
+            answers = []
+            for answer_obj in obj['answers']:
+
+                try:
+                    text = answer_obj['text']
+                    if not text:
+                        raise Http404
+
+                    user_answer = answer_obj['user_answer']
+                except Exception:
+                    raise Http404('Проверьте наличе полей text, user_answer у answers')
+
+                answer_lst = models.Answer.objects.filter(text=text)
+                if answer_lst.exists():
+                    new_answer = answer_lst.first()
+                else:
+                    new_answer = models.Answer.objects.create(text=text, user_answer=user_answer)
+                answers.append(new_answer)
+
+            if not answers:
+                raise Http404("Проверьте наличие поля answers")
+            try:
+                question_id = obj['question']['id']
+            except Exception:
+                raise Http404('Отсутствует ключ question или id у question_and_answers')
+
+            new = models.QuestionAndAnswer.objects.filter(survey=instance, question=question_id)
+            if new.exists():
+                new = new.first()
+                new.answers.set(answers)
+            else:
+                print('instance == ', instance)
+                new = models.QuestionAndAnswer.objects.create(survey=instance, question_id=question_id)
+                new.answers.set(answers)
+
+        return instance
+
+        
+        
+
+        
+    
+    
 #### Сериализаторы Опросника
 
 
@@ -147,13 +275,6 @@ class BenefitSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'about']
 
 
-class LoyaltyBenefitSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = users_models.LoyaltyBenefit
-        fields = ['id', 'loyalty', 'benefit']
-
-
 class OfferSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -161,13 +282,13 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'about', 'offer_to_all']
 
 
-class LoyaltySerializer(serializers.ModelSerializer):
 
+class LoyaltySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = users_models.Loyalty
         fields = ['user_id', 'card_number', 'show_user_name', 'balance', 'balance_history', 'code', 'benefits_history',
-                  'offers', 'new_befit']
+                  'offers', 'new_benefits_count', 'benefit_to_choose']
         depth = 1
 
     def to_representation(self, instance):
@@ -175,10 +296,32 @@ class LoyaltySerializer(serializers.ModelSerializer):
         offer_to_all = users_models.Offer.objects.filter(offer_to_all=True)
         ret['offers'] = ret['offers'] + OfferSerializer(offer_to_all, many=True).data
         ret['all_benefits'] = BenefitSerializer(users_models.Benefit.objects.all(), many=True).data
+
         return ret
 
 
+class LoyaltyBenefitSerializer(serializers.ModelSerializer):
+    # loyalty = LoyaltySerializer(read_only=True, many=False)
+    # benefit = BenefitSerializer(read_only=True, many=False)
+
+    class Meta:
+        model = users_models.LoyaltyBenefit
+        fields = ['id', 'benefit']
+        # depth = 1
+
 #### Loyalty Benefit (User_app)
+
+
+#### WebsiteSettings
+
+class WebsiteSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WebsiteSettings
+        fields = ['name', 'min_write_time']
+        depth = 1
+
+
+#### WebsiteSettings
 
 
 

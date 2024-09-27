@@ -1,0 +1,149 @@
+
+
+######http://127.0.0.1:8000/api/v1/survey_detail/
+
+{
+    "user_id": 2,
+    "dependable": true,
+    "question_and_answers": [
+        {
+            "question": {
+                "id": 1
+                },
+            "answers": [
+                {
+                    "text": "Диван",
+                    "user_answer": false
+                },
+                {
+                    "text": "ГамакТЕСТ!!!",
+                    "user_answer": true
+                }
+            ]
+        },
+                {
+            "question": {
+                "id": 2
+                },
+            "answers": [
+                {
+                    "text": "Качество",
+                    "user_answer": false
+                },
+                {
+                    "text": "Цена!!!",
+                    "user_answer": false
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 3
+                },
+            "answers": [
+                {
+                    "text": "Мегахакатон",
+                    "user_answer": true
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 4
+                },
+            "answers": [
+                {
+                    "text": "Скидки на мебель",
+                    "user_answer": false
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 5
+                },
+            "answers": [
+                {
+                    "text": "Раз в несколько лет",
+                    "user_answer": true
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 6
+                },
+            "answers": [
+                {
+                    "text": "Да",
+                    "user_answer": false
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 7
+                },
+            "answers": [
+                {
+                    "text": "Современный",
+                    "user_answer": false
+                },
+                {
+                    "text": "Скандинавский",
+                    "user_answer": false
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 8
+                },
+            "answers": [
+                {
+                    "text": "Качество продукции",
+                    "user_answer": false
+                },
+                {
+                    "text": "Цены",
+                    "user_answer": false
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 9
+                },
+            "answers": [
+                {
+                    "text": "ДА",
+                    "user_answer": false
+                }
+            ]
+        },
+        {
+            "question": {
+                "id": 10
+                },
+            "answers": [
+                {
+                    "text": "50 000 — 100 000 ₽",
+                    "user_answer": false
+                }
+            ]
+        },
+                {
+            "question": {
+                "id": 11
+                },
+            "answers": [
+                {
+                    "text": "Проживаю с родителями/родственниками",
+                    "user_answer": false
+                }
+            ]
+        }
+    ]
+}
+
+#################

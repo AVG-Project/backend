@@ -1,11 +1,13 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.core.validators import RegexValidator
-from users.models import Loyalty
+from users import models as user_models
 from django.utils import timezone
 from PIL import Image
 import os
 from django.conf import settings
+from . import validations as my_validations
+from collections import Counter
 
 
 #todo Переделать. Не записывать урезанные картинки в бд, а резать и выдавать их при запросе в сериализаторе или вьюшке
@@ -57,16 +59,50 @@ class ProjectImage(models.Model):
         return new_name
 
 
+### m2m
+class FurnitureImage(models.Model):
+    furniture = models.ForeignKey('Furniture', on_delete=models.CASCADE)
+    project_image = models.ForeignKey('ProjectImage', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Мебель({self.furniture.pk}) Изображение(id={self.project_image.pk})={self.project_image.image.path}'
+
+    class Meta:
+        # Для уникальности м2м
+        constraints = [
+            models.UniqueConstraint(fields=['furniture', 'project_image'], name='furniture_project_image'),
+        ]
+        verbose_name = "Изображение для мебели"
+        verbose_name_plural = "Изображения для мебели"
+
+
 class Tags(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name='Название')
     highlight = models.BooleanField(default=False, verbose_name='Визуальное выделение')
 
     def __str__(self):
-        return f'{self.name}(id {self.pk}) Подсветка: {self.highlight}'
+        return f'{self.name}(id {self.pk})'
 
     class Meta:
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
+
+
+### m2m
+class FurnitureTags(models.Model):
+    furniture = models.ForeignKey('Furniture', on_delete=models.CASCADE)
+    tag = models.ForeignKey('Tags', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.furniture}: {self.tag}'
+
+    class Meta:
+        # Для уникальности м2м
+        constraints = [
+            models.UniqueConstraint(fields=['furniture', 'tag'], name='furniture_tag'),
+        ]
+        verbose_name = "Тег мебели"
+        verbose_name_plural = "Теги для мебели"
 
 
 class FurnitureCategory(models.Model):
@@ -87,8 +123,8 @@ class FurnitureCategory(models.Model):
 class Furniture(models.Model):
 
     category = models.ForeignKey(FurnitureCategory, on_delete=models.CASCADE, verbose_name='Категория мебели')
-    name = models.CharField(max_length=150, verbose_name='Название')
-    tags = models.ManyToManyField(Tags, through='FurnitureTags', related_name='tags',
+    name = models.CharField(max_length=150, verbose_name='Название', unique=True)
+    tags = models.ManyToManyField('Tags', through='FurnitureTags', related_name='tags',
         verbose_name='Теги')
     text = models.TextField(verbose_name='Описание мебели')
     price = models.PositiveIntegerField(verbose_name='Стоимость', default=1)
@@ -98,21 +134,79 @@ class Furniture(models.Model):
     model_3d = models.CharField(null=True, blank=True, default='В РАЗРАБОТКЕ', max_length=20000,
         verbose_name='3D модель готовой мебели')
     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    recommendations = models.ManyToManyField('self', verbose_name='Список рекомендаций',
+        through='SimilarFurniture', blank=True)
+
+
+    def check_recommendations(self):
+        if self.recommendations.all().count() < 3:
+            recommendations = self.recommendations.all()
+            default_rec_len = recommendations.count()
+            lack_of_rec = 3 - default_rec_len
+            print('default_rec_len == ', default_rec_len)
+            print('lack_of_rec == ', lack_of_rec)
+            ignore = list(recommendations.values_list('id', flat=True))
+            similar = self.get_similar(num=lack_of_rec, ignore=ignore)
+            print('recommendations== ', recommendations)
+            print('similar == ', similar)
+            new_set = recommendations.union(similar)
+            print('new_set == ', new_set)
+            for new in new_set:
+                if SimilarFurniture.objects.filter(instance_furniture=self, similar_furniture=new).exists():
+                    pass
+                else:
+                    SimilarFurniture.objects.create(instance_furniture=self, similar_furniture=new)
+
+
+
+
+
+    def get_similar(self, num=3, ignore=None):
+        """Получает список id мебели для игнорирования и необходимое количество похожей мебели для возврата.
+        Возвращает кверисет из похожих объектов мебели (или случайных если нет достаточно объектов в той же категории).
+        В лучшем случае только из своей категории с наибольшим совпадением тегов"""
+        if ignore is None:
+            ignore = []
+        ignore.append(self.pk)
+        similar_objs = Furniture.objects.filter(category=self.category, tags__in=self.tags.all()).exclude(pk__in=ignore)
+        if similar_objs.count() < num:
+            similar_objs = Furniture.objects.filter(category=self.category).exclude(pk__in=ignore)
+        if similar_objs.count() < num:
+            similar_objs = Furniture.objects.exclude(pk__in=ignore)
+        similar_objs_dct = Counter(similar_objs.values_list('id', flat=True))
+        sorted_similar = sorted(similar_objs_dct.items(), key=lambda item: item[1], reverse=True)[:num]
+        pk_list = [_[0] for _ in sorted_similar]
+        similar = Furniture.objects.filter(pk__in=pk_list)
+
+        return similar
 
 
     class Meta:
         verbose_name = "Мебель"
         verbose_name_plural = "Готовая мебель для ознакомления"
 
-
     def get_tags(self):
         tags = self.tags.all()
-
         return ', '.join([tag.name for tag in tags])
 
 
     def __str__(self):
         return f'{self.name}(id={self.pk})'
+
+
+
+
+### m2m
+class SimilarFurniture(models.Model):
+    instance_furniture = models.ForeignKey('Furniture', on_delete=models.CASCADE, related_name='instance_furniture')
+    similar_furniture = models.ForeignKey('Furniture', on_delete=models.CASCADE, related_name='similar_furniture')
+
+    def __str__(self):
+        return f'К {self.instance_furniture.name} рекомендовать {self.similar_furniture.name}'
+
+    class Meta:
+        verbose_name = "Рекомендовать к этой мебели"
+        verbose_name_plural = "Рекомендовать к этой мебели"
 
 
 class News(models.Model):
@@ -132,30 +226,20 @@ class News(models.Model):
         verbose_name_plural = "Новости"
 
 
-
+#todo проверять чтобы пользователь не создавал другой аккаунт и использовал тот код лояльности. адрес и тд
 class Order(models.Model):
-    code_3d = '<div class="sketchfab-embed-wrapper"> ' \
-              '<iframe title="3D" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" ' \
-              'allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking ' \
-              'execution-while-out-of-viewport execution-while-not-rendered web-share ' \
-              'src="https://sketchfab.com/models/b4ec7831bb3e416c841c50b88c1bea16/embed"> ' \
-              '</iframe> <p style="font-size: 13px; font-weight: normal; margin: 5px; ' \
-              'color: #4A4A4A;"> <a href="https://sketchfab.com/3d-models/3d-b4ec7831bb3e416c841c50b88c1bea16?utm_' \
-              'medium=embed&utm_campaign=share-popup&utm_content=b4ec7831bb3e416c841c50b88c1bea16" target="_blank" ' \
-              'rel="nofollow" style="font-weight: bold; color: #1CAAD9;"> 3D </a> by ' \
-              '<a href="https://sketchfab.com/ki1004ka?utm_medium=embed&utm_campaign=share-popup&utm_content=' \
-              'b4ec7831bb3e416c841c50b88c1bea16" target="_blank" rel="nofollow" style="font-weight: bold; ' \
-              'color: #1CAAD9;"> Alexander Vasiliev </a> on ' \
-              '<a href="https://sketchfab.com?utm_medium=embed&utm_campaign=share-popup&utm_content=' \
-              'b4ec7831bb3e416c841c50b88c1bea16" target="_blank" rel="nofollow" style="font-weight: ' \
-              'bold; color: #1CAAD9;">Sketchfab</a></p></div>'
+    loyalty_code = models.CharField(max_length=5, blank=True, null=True, default=None,
+        verbose_name='Чужой код лояльности',
+        help_text='Если покупатель совершает заказ с использованием чужого кода лояльности, '
+                  'владелец кода автоматически оповещается о возможности выбора выгоды')
+    code_3d = '3d code'
     STATUSES = [
-        ('1', 'Создан'),
-        ('2', 'Выезд замерщика'),
-        ('3', 'Подготовка эскиза'),
-        ('4', 'Монтаж'),
-        ('5', 'Выполнен'),
-        ('6', 'Отклонен'),
+        ('Создан', 'Создан'),
+        ('Выезд замерщика', 'Выезд замерщика'),
+        ('Подготовка эскиза', 'Подготовка эскиза'),
+        ('Монтаж', 'Монтаж'),
+        ('Выполнен', 'Выполнен'),
+        ('Отклонен', 'Отклонен'),
     ]
     #todo заменить на нового юзера потом
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Покупатель')
@@ -163,8 +247,9 @@ class Order(models.Model):
     number = models.CharField(max_length=150, verbose_name='Номер заказа')
     create_date = models.DateField(null=True, verbose_name='Дата заказа')
     shipment_date = models.DateField(null=True, blank=True, verbose_name='Дата доставки')
-    status = models.CharField(max_length=1, choices=STATUSES, default='1', verbose_name='Статус заказа')
+    status = models.CharField(max_length=100, choices=STATUSES, default='1', verbose_name='Статус заказа')
     address = models.CharField(max_length=150, verbose_name='Адрес доставки')
+    #todo сделать поле обязательным
     contract = models.FileField(upload_to='contracts', blank=True, verbose_name='Договор')
     model_3d = models.CharField(null=True, blank=True, default=code_3d, max_length=20000,
         verbose_name='3D модель')
@@ -175,10 +260,11 @@ class Order(models.Model):
     # additional_info =
 
     #todo настроить при наличии
-    # loyalty_code = models.ForeignKey(Loyalty, models.SET_NULL, blank=True, null=True)
+    #
 
     def __str__(self):
-        return f'ID={self.pk} | user={self.user.pk} | number={self.number}'
+        return f'{self.number} | {self.user.last_name.capitalize()} {self.user.first_name.capitalize()} | ' \
+               f'{self.user.email}'
 
 
     class Meta:
@@ -220,12 +306,10 @@ class Application(models.Model):
 
 
 
-
-
-
+#todo !! перед завершением перенести эти модели в юзерс
 #### Survey Опросник с готовыми ответами
 class Answer(models.Model):
-    text = models.TextField(verbose_name='Ответ')
+    text = models.TextField(verbose_name='Ответ', unique=True)
     user_answer = models.BooleanField(default=False, verbose_name='Ответ написан пользователем',
         help_text='Если True, то вариант был написан пользователем', blank=False)
 
@@ -239,14 +323,16 @@ class Answer(models.Model):
 
 
 class QuestionAndAnswer(models.Model):
+    survey = models.ForeignKey('Survey', on_delete=models.CASCADE, verbose_name='Опросник', default=1)
     question = models.ForeignKey('Question', on_delete=models.CASCADE, verbose_name='Вопрос')
     answers = models.ManyToManyField('Answer', through='AnswerQuestionAndAnswer',
         related_name='answers')
-    # user_answer = models.BooleanField(default=False, verbose_name='Ответ написан пользователем',
-    #     help_text='Если True, то вариант не был написан пользователем')
 
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['survey', 'question'], name='survey_question'),
+        ]
         verbose_name = "(Тех)QuestionAndAnswer"
         verbose_name_plural = "(Тех)QuestionAndAnswers"
 
@@ -256,7 +342,7 @@ class QuestionAndAnswer(models.Model):
 
 # Many_to_many
 class AnswerQuestionAndAnswer(models.Model):
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    answer = models.ForeignKey('Answer', on_delete=models.CASCADE)
     question_and_answer = models.ForeignKey('QuestionAndAnswer', on_delete=models.CASCADE)
 
 
@@ -269,39 +355,34 @@ class AnswerQuestionAndAnswer(models.Model):
 
 
 class Survey(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
-    # user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Пользователь', null=True, blank=True)
-    question_and_answers = models.ManyToManyField(QuestionAndAnswer, through='SurveyQuestionAndAnswer',
-        related_name='question_and_answers', blank=False)
-    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата опроса')
-    survey_was_changed = models.BooleanField(default=False, verbose_name='Опросник был изменен',
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, verbose_name='Пользователь')
+    # question_and_answers = models.ManyToManyField(QuestionAndAnswer, through='SurveyQuestionAndAnswer',
+    #     related_name='question_and_answers', blank=False)
+    dependable = models.BooleanField(default=True, verbose_name='Опросник надежен', blank=False,
+        help_text='Статус становится положительным в случае если опросник заполняли '
+                  'больше минимального времени заполнения. При аналитике ненадежные будут вычеркиваться из выборки')
+
+    questions_was_changed = models.BooleanField(default=False, verbose_name='Опросник был изменен', blank=True,
         help_text='Данный статус автоматически изменяется если были изменения в опроснике'
                   '(как случай, добавление новых вопросов)\n'
                   'Если есть новые вопросы пользователь должен будет вновь пройти опрос')
-    survey_filling_duration = models.PositiveIntegerField(verbose_name='Длительность заполнения опросника.', default=0)
+    time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата опроса')
 
     def __str__(self):
-        return f'({self.pk})|User={self.user.pk}'
+        return f'{self.user.username} (id={self.user_id})'
 
     class Meta:
         verbose_name = "Опрос пользователя"
         verbose_name_plural = "Опросы пользователей"
 
-
-# Many_to_many
-class SurveyQuestionAndAnswer(models.Model):
-    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
-    question_and_answer = models.ForeignKey(QuestionAndAnswer, on_delete=models.CASCADE)
-
-
-    def __str__(self):
-        return f'({self.pk} Опрос({self.survey.pk})'
-
-    class Meta:
-        verbose_name = "(m2m)Ответ на вопрос"
-        verbose_name_plural = "(m2m)Ответы на вопросы"
-#### Survey Опросник с готовыми ответами
-
+        #todo
+    def show_info(self):
+        num = len(self.questionandanswer_set.all())
+        if self.dependable:
+            text = f'Ответы на {num} вопросов.'
+        else:
+            text = f'НЕНАДЕЖЕН'
+        return text
 
 
 #### Question Вопросы для опросника
@@ -348,36 +429,7 @@ class QuestionOption(models.Model):
 
 
 ####### Промежуточные таблицы для ManyToMany
-class FurnitureTags(models.Model):
-    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f'{self.furniture}: {self.tag}'
-
-    class Meta:
-        # Для уникальности м2м
-        constraints = [
-            models.UniqueConstraint(fields=['furniture', 'tag'], name='furniture_tag'),
-        ]
-        verbose_name = "Тег мебели"
-        verbose_name_plural = "Теги для мебели"
-
-
-class FurnitureImage(models.Model):
-    furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
-    project_image = models.ForeignKey(ProjectImage, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Мебель({self.furniture.pk}) Изображение(id={self.project_image.pk})={self.project_image.image.path}'
-
-    class Meta:
-        # Для уникальности м2м
-        constraints = [
-            models.UniqueConstraint(fields=['furniture', 'project_image'], name='furniture_project_image'),
-        ]
-        verbose_name = "Изображение для мебели"
-        verbose_name_plural = "Изображения для мебели"
 
 class OrderImage(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -393,7 +445,26 @@ class OrderImage(models.Model):
         verbose_name = "Изображение для заказа"
         verbose_name_plural = "Изображения для заказа"
 
+####### Промежуточные таблицы для ManyToMany
 
+####### Промежуточные таблицы для ManyToMany
+class WebsiteSettings(models.Model):
+    name = models.CharField(max_length=100, default='Все настройки', blank=True, verbose_name='')
+    date_modified = models.DateTimeField(auto_now=True)
+    min_write_time = models.PositiveIntegerField(default=30, verbose_name='Мин. время заполнения опросника(сек)',
+    help_text='Минимальное количество времени, требуемое для заполнение опросника. Если опросник был заполнен быстрее, '
+              'он будет помечен как неблагонадежный. Неблагонадежные опросники будут исключаться из аналитики.')
+
+    def __str__(self):
+        return f'Список настроек({self.pk}). Последнее изменение {self.date_modified}'
+
+    class Meta:
+        verbose_name = "Настройки сайта"
+        verbose_name_plural = "Настройки сайта"
+
+
+
+####### Промежуточные таблицы для ManyToMany
 ####### Старое
 
 # class Description(models.Model):

@@ -2,11 +2,10 @@ from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from Istok_app.models import Furniture, Tags, News, Order, Application, FurnitureCategory, Question, Survey
-from users.models import Loyalty, Benefit
-from .serializers import FurnitureListSerializer, NewsListSerializer, OrdersListSerializer,\
-    ApplicationSerializer, QuestionSerializer, SurveySerializer, LoyaltySerializer, BenefitSerializer, \
-    LoyaltyBenefitSerializer
+from Istok_app.models import Furniture, Tags, News, Order, Application, FurnitureCategory, Question, \
+    Survey, WebsiteSettings
+from users.models import Loyalty, Benefit, LoyaltyBenefit
+from . import serializers as my_serializers
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -25,6 +24,34 @@ from rest_framework.filters import OrderingFilter  # если импортиро
 from rest_framework import serializers
 from django.http import Http404, HttpResponseForbidden
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+
+# from rest_framework.generics import get_object_or_404
+
+
+def variables(request):
+    tags = list(Tags.objects.all().values())
+    furniture_categories = list(FurnitureCategory.objects.all().values())
+
+    return JsonResponse({'all_tags': tags, 'all_categories': furniture_categories})
+
+
+def user_info(request):
+    user = request.user
+    user_loyalty = False
+    user_survey = False
+    is_authenticated = False
+    if user.is_authenticated:
+        is_authenticated = True
+        if user.loyalty:
+            user_loyalty = True
+        if user.survey:
+            user_survey = True
+
+
+    return JsonResponse({'is_authenticated': is_authenticated,
+                         'user_loyalty': user_loyalty, 'user_survey': user_survey})
+
 
 
 class FurniturePagination(PageNumberPagination):
@@ -40,12 +67,25 @@ class FurnitureList(mixins.ListModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = FurnitureListSerializer
+    serializer_class = my_serializers.FurnitureListSerializer
     pagination_class = FurniturePagination
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FurnitureFilter
     ordering_fields = ['price', 'time_created']
     permission_classes = (IsAdminOrReadOnly, )
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.check_recommendations()
+        serializer = my_serializers.ExtraFurnitureListSerializer(instance)
+        return Response(serializer.data)
+
+    def get_object(self):
+        """Костыль для перепроверки наличия рекомендаций"""
+        obj = super(FurnitureList, self).get_object()
+        obj.check_recommendations()
+        print('"""Костыль для перепроверки наличия рекомендаций"""')
+        return obj
 
 
     def get_queryset(self):
@@ -62,12 +102,7 @@ def choice_list_to_dict(lst_of_tup):
     return lst
 
 
-#todo
-def variables(request):
-    tags = list(Tags.objects.all().values())
-    furniture_categories = list(FurnitureCategory.objects.all().values())
 
-    return JsonResponse({'all_tags': tags, 'all_categories': furniture_categories})
 
 
 class NewsList(mixins.ListModelMixin,
@@ -76,7 +111,7 @@ class NewsList(mixins.ListModelMixin,
                     # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = NewsListSerializer
+    serializer_class = my_serializers.NewsListSerializer
     filter_backends = [OrderingFilter]
     ordering = ['-time_created']
 
@@ -94,7 +129,7 @@ class OrdersList(mixins.ListModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = OrdersListSerializer
+    serializer_class = my_serializers.OrdersListSerializer
     ordering = ['-create_date']
 
 
@@ -111,7 +146,7 @@ class ApplicationsList(mixins.ListModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = ApplicationSerializer
+    serializer_class = my_serializers.ApplicationSerializer
     ordering = ['-time_created']
 
 
@@ -122,23 +157,35 @@ class ApplicationsList(mixins.ListModelMixin,
         return Application.objects.filter(pk=pk)
 
 
-#### Опросник и Анкета
-class SurveysList(
-                    mixins.ListModelMixin,
+#### Опросник и Анкета todo
+class SurveyDetail(
+                    # mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     mixins.CreateModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = SurveySerializer
+    permission_classes = (IsAuthenticated, )
+    serializer_class = my_serializers.SurveySerializer
     ordering = ['-time_created']
 
+    # def create(self, request, *args, **kwargs):
+    #     print('\nСработал метод create\n')
+    #     request.data['user_id'] = self.request.user.pk
+    #     ret = super(SurveyDetail, self).create(request, *args, **kwargs)
+    #     return ret
+    #
+    #
+    # def update(self, request, *args, **kwargs):
+    #     print('\nСработал метод update\n')
+    #     ret = super(SurveyDetail, self).update(request, *args, **kwargs)
+    #     # print(ret.data)
+    #     return ret
 
-    def get_queryset(self):
-        pk = self.kwargs.get('pk', None)
-        if not pk:
-            return Survey.objects.all().order_by('-time_created')
-        return Survey.objects.filter(pk=pk)
+    def get_object(self):
+        obj = get_object_or_404(Survey, user_id=self.request.user.pk)
+        return obj
+
 
 
 class QuestionsList(mixins.ListModelMixin,
@@ -147,9 +194,9 @@ class QuestionsList(mixins.ListModelMixin,
                     # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = QuestionSerializer
-    ordering = ['id']
 
+    serializer_class = my_serializers.QuestionSerializer
+    ordering = ['id']
 
     def get_queryset(self):
         pk = self.kwargs.get('pk', None)
@@ -168,7 +215,7 @@ class LoyaltyDetail(mixins.ListModelMixin,
                     # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = LoyaltySerializer
+    serializer_class = my_serializers.LoyaltySerializer
     permission_classes = (IsAuthenticated,)
 
 
@@ -180,14 +227,25 @@ class LoyaltyDetail(mixins.ListModelMixin,
         return Loyalty.objects.filter(pk=pk)
 
 
-class LoyaltyBenefitCreate(  # mixins.ListModelMixin,
-                    # mixins.RetrieveModelMixin,
-                    mixins.CreateModelMixin,
-                    # mixins.UpdateModelMixin,
+class LoyaltyBenefitUpdate(  # mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = LoyaltyBenefitSerializer
+    serializer_class = my_serializers.LoyaltyBenefitSerializer
 
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk', None)
+        return LoyaltyBenefit.objects.filter(pk=pk)
+
+
+
+class WebsiteSettingsList(mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
+    queryset = WebsiteSettings.objects.all()
+    serializer_class = my_serializers.WebsiteSettingsSerializer
 
 
 # class BenefitList(mixins.ListModelMixin,
@@ -205,6 +263,32 @@ class LoyaltyBenefitCreate(  # mixins.ListModelMixin,
 
 
 
+
+
+# from collections import Counter
+#
+#
+# def test(request, pk):
+#     obj = get_object_or_404(Furniture, pk=pk)
+#     obj_tags = obj.tags.values_list('id')
+#
+#     similar_objs = Furniture.objects.filter(category_id=obj.category_id, tags__in=obj.tags.all()).\
+#         exclude(pk=pk)
+#     similar_objs_dct = Counter(similar_objs.values_list('id', flat=True))
+#     sorted_similar = sorted(similar_objs_dct.items(), key=lambda item: item[1], reverse=True)[:3]
+#     lst_sorted = [_[0] for _ in sorted_similar]
+#     ready_similar = Furniture.objects.filter(pk__in=lst_sorted)
+#
+#
+#
+#     return JsonResponse({'obj': obj.name, 'obj_tags': list(obj_tags),
+#                          'similar_objs': list(similar_objs.values_list('id', flat=True)),
+#                          # 'new_obj_tags': list(similar_objs.values('name')),
+#                          'similar_objs_dct': similar_objs_dct,
+#                          'lst_sorted': lst_sorted,
+#                          'ready_similar': list(ready_similar.values()),
+#
+#                          })
 
 
 
