@@ -11,35 +11,9 @@ from django.utils import timezone
 from datetime import datetime
 
 
-# from Istok_app.models import Orders
+class CustomUser(AbstractUser):
+    pass
 
-
-class Profile(models.Model):
-
-    surname = models.CharField(max_length=30, unique=False, verbose_name='Отчество', blank=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='User джанго модели', primary_key=True)
-    birth_date = BirthdayField(null=True, verbose_name='Дата рождения')
-    mailing = models.BooleanField(default=False, verbose_name='Согласие на рассылку', blank=True)
-    personal_data_processing = models.BooleanField(default=False, blank=True,
-        verbose_name='Согласие на обработку персональных данных')
-
-    def __str__(self):
-        return f'{self.user.username} Profile'
-
-
-# todo вероятна уязвимость при редактировании полей опроса модели, путем изменения post ее могут привязать
-# к другому пользователю, если редактирование модели будет происходит в одной въюшке.
-# Возможно стоит выделить опросник в отдельную модель
-
-
-# BONUS_CHOICE = [
-#     ('Скидка 10%', 'Скидка 10%\nДополнительная скидка при оплате техники или сантехники'),
-#     ('Скидка на столешницы SLOTEX', 'Скидка на столешницы SLOTEX\n'
-#           'Столешница Slotex - это влагостойкая ДСП, облицованная декоративным покрытием Slotex.'),
-#     ('4', '10 000 рублей\nДенежными средствами (не на бонусный счёт)'),
-#     ('5', '15 000 рублей\nНа бонусный счёт (1 бонус = 1 рубль)'),
-#     ('6', '20 000 рублей\nМебель стоимость до 20 000 рублей в подарок')
-# ]
 
 
 class Offer(models.Model):
@@ -84,7 +58,7 @@ class Loyalty(models.Model):
         message="Номер карты должен быть указан в формате: "
                 "0000 0000 0000 0000")
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь', primary_key=True)
+    user = models.OneToOneField('CustomUser', on_delete=models.CASCADE, verbose_name='Пользователь', primary_key=True)
     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     balance = models.IntegerField(default=0, verbose_name='Баланс', blank=True)
@@ -272,22 +246,6 @@ class LoyaltyBenefit(models.Model):
     class Meta:
         verbose_name = "(m2m) Выбранная выгода"
         verbose_name_plural = "(m2m) Выбранная выгода"
-
-# # m2m
-# class LoyaltyBenefit(models.Model):
-#     # furniture = models.ForeignKey(Furniture, on_delete=models.CASCADE)
-#     # project_image = models.ForeignKey(ProjectImage, on_delete=models.CASCADE)
-#
-#     def __str__(self):
-#         return f''
-#
-#     # class Meta:
-#     #     # Для уникальности м2м
-#     #     constraints = [
-#     #         models.UniqueConstraint(fields=['furniture', 'project_image'], name='furniture_project_image'),
-#     #     ]
-#     #     verbose_name = "Изображение для мебели"
-#     #     verbose_name_plural = "Изображения для мебели"
 
 
 # для быстрого подключения в консоли

@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from users.models import CustomUser as User
 from django.db import models
 from django.core.validators import RegexValidator
 from users import models as user_models
@@ -194,8 +195,6 @@ class Furniture(models.Model):
         return f'{self.name}(id={self.pk})'
 
 
-
-
 ### m2m
 class SimilarFurniture(models.Model):
     instance_furniture = models.ForeignKey('Furniture', on_delete=models.CASCADE, related_name='instance_furniture')
@@ -272,7 +271,6 @@ class Order(models.Model):
         verbose_name_plural = "Заказы"
 
 
-
 class Application(models.Model):
 
     PHONE_REGEX = RegexValidator(
@@ -303,7 +301,6 @@ class Application(models.Model):
     class Meta:
         verbose_name = "Заявка"
         verbose_name_plural = "Заявки пользователей"
-
 
 
 #todo !! перед завершением перенести эти модели в юзерс
