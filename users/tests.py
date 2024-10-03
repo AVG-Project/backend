@@ -5,8 +5,7 @@ from django.utils import timezone
 
 
 
-print(f'Регистрация в системе лояльности {datetime.now().date()}')
 
-print(datetime.now())
+
 
 

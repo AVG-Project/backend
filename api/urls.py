@@ -1,6 +1,7 @@
 from django.urls import path, include, re_path
 from . import views
 from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 
 router = routers.DefaultRouter()
@@ -20,11 +21,20 @@ urlpatterns = [
     path("api/v1/", include(router.urls)),  # http://127.0.0.1:8000/api/v1/finished_furniture/
 
     path('api/v1/drf-auth/', include('rest_framework.urls')),
+
     path('api/v1/auth/', include('djoser.urls')),
+    path("api/v1/auth/", include("djoser.urls.jwt")),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
+
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+
     path('api/v1/variables/', views.variables),
     path('api/v1/user_info/', views.user_info),
     # path('api/v1/test/<int:pk>/', views.test),
     path('api/v1/survey_detail/', views.SurveyDetail.as_view({'get': 'retrieve', 'post': 'create',
                                                               'put': 'update', 'patch': 'update'})),
 ]
+

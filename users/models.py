@@ -1,18 +1,95 @@
 from birthday import BirthdayField
 from django.db import models
-from django.contrib.auth.models import User
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
+
 import random
-from . import validations
 import string
+
+from . import validations
+from .managers import UserManager
+
 from django.core.validators import RegexValidator
 from django.core.validators import MinLengthValidator, MinValueValidator, MaxValueValidator
+
 from django.utils import timezone
 from datetime import datetime
+from birthday import BirthdayField
 
 
-class CustomUser(AbstractUser):
-    pass
+# class CustomUser(AbstractUser):
+#     pass
+
+
+
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    PHONE_REGEX = RegexValidator(
+        regex=r'^\+?1?\d{9,13}$',
+        message="Телефон должен быть указан в формате: "
+                "'+7ХХХХХХХХХХ'. Максимум 13 символов.")
+
+    # username = models.CharField('Пользователь', max_length=255, unique=True)
+    email = models.EmailField('Email', unique=True)
+    phone = models.CharField(validators=[PHONE_REGEX], max_length=13, unique=True,
+        verbose_name='Ваш номер телефона')
+
+    mailing = models.BooleanField(default=False, verbose_name='Согласие на рассылку', blank=True)
+    personal_data_processing = models.BooleanField(default=False, blank=True,
+        verbose_name='Согласие на обработку персональных данных')
+    last_name = models.CharField('Фамилия', max_length=255)
+    first_name = models.CharField('Имя', max_length=255)
+    patronymic = models.CharField('Отчество', max_length=255, blank=True)
+    birth_date = BirthdayField(verbose_name='Дата рождения', blank=True, null=True)
+
+    date_joined = models.DateTimeField('Дата регистрации', auto_now_add=True)
+
+    is_superuser = models.BooleanField(default=False, verbose_name='Админ',
+        help_text="Полный доступ к инструментам админ панели")  # a superuser
+    is_staff = models.BooleanField("Статус сотрудника", default=False,
+        help_text="Дает возможность посещать админ панель сайта (с ограничением возможностей)")
+    is_active = models.BooleanField("Активный", default=False,
+        help_text="Активный пользователь")
+    is_verified = models.BooleanField('Контактные данные подтверждены', default=False)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['phone']
+
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        # unique_together = ('username', 'email', 'phone')
+
+    def __str__(self):
+        return self.email
+
+
+    def full_name(self):
+        return f"{self.last_name.capitalize()} {self.first_name.capitalize()} {self.patronymic.capitalize()}"
+
+
+    # def has_perm(self, perm, obj=None):
+    #     "Does the user have a specific permission?"
+    #     return self.is_admin
+    #
+    # def has_module_perms(self, app_label):
+    #     "Does the user have permissions to view the app `app_label`?"
+    #     return True
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
