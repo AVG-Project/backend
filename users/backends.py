@@ -18,7 +18,6 @@ class AuthBackend(object):
             return None
 
     def authenticate(self, request, email, password):
-        print(request.POST)
         try:
             user = User.objects.get(
                 Q(email=email) | Q(phone=email)

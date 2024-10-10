@@ -10,10 +10,11 @@ from . import serializers as my_serializers
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
+from .permissions import IsAdminOrReadOnly, SameUser
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, metadata, mixins
-from .permissions import IsAdminOrReadOnly
+
 from django.contrib.auth.decorators import permission_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -25,6 +26,8 @@ from rest_framework import serializers
 from django.http import Http404, HttpResponseForbidden
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 # from rest_framework.generics import get_object_or_404
 
@@ -36,6 +39,72 @@ def variables(request):
     return JsonResponse({'all_tags': tags, 'all_categories': furniture_categories})
 
 
+#### User
+class UserDetail(
+                    # mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = my_serializers.UserDetailSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_object(self):
+        obj = get_object_or_404(User, pk=self.request.user.pk)
+        return obj
+
+# class UserCreate(
+#                     # mixins.ListModelMixin,
+#                     # mixins.RetrieveModelMixin,
+#                     mixins.CreateModelMixin,
+#                     # mixins.UpdateModelMixin,
+#                     viewsets.GenericViewSet):
+#
+#     serializer_class = my_serializers.UserCreateSerializer
+#
+#
+# class UserUpdate(
+#                     # mixins.ListModelMixin,
+#                     # mixins.RetrieveModelMixin,
+#                     # mixins.CreateModelMixin,
+#                     mixins.UpdateModelMixin,
+#                     viewsets.GenericViewSet):
+#
+#     serializer_class = my_serializers.UserCreateSerializer
+#     permission_classes = (IsAuthenticated, SameUser)
+#
+#     def get_object(self):
+#         obj = get_object_or_404(User, pk=self.request.user.pk)
+#         return obj
+
+#########
+# from djoser import views as djoser_views
+# from rest_framework.decorators import action
+#
+# class CustomUserViewSet(djoser_views.UserViewSet):
+#
+#     @action(["post"], detail=False, url_path=f"set_email2")
+#     def set_username(self, request, *args, **kwargs):
+#         ret = super(CustomUserViewSet, self).set_username(request, *args, **kwargs)
+#         print('\nСработал CustomUserViewSet set_username()\n')
+#         return ret
+#
+#     @action(["post"], detail=False, url_path=f"reset_email")
+#     def reset_username(self, request, *args, **kwargs):
+#         ret = super(CustomUserViewSet, self).reset_username(request, *args, **kwargs)
+#         print('\nСработал CustomUserViewSet reset_username()\n')
+#         return ret
+
+
+
+##########
+
+
+
+
+
+
 def user_info(request):
     user = request.user
     user_loyalty = False
@@ -43,15 +112,19 @@ def user_info(request):
     is_authenticated = False
     if user.is_authenticated:
         is_authenticated = True
-        if user.loyalty:
-            user_loyalty = True
-        if user.survey:
-            user_survey = True
+        try:
+            if user.loyalty:
+                user_loyalty = True
+            if user.survey:
+                user_survey = True
+        except Exception as e:
+            pass
+
 
 
     return JsonResponse({'is_authenticated': is_authenticated,
                          'user_loyalty': user_loyalty, 'user_survey': user_survey})
-
+#### User
 
 
 class FurniturePagination(PageNumberPagination):
@@ -83,8 +156,7 @@ class FurnitureList(mixins.ListModelMixin,
     def get_object(self):
         """Костыль для перепроверки наличия рекомендаций"""
         obj = super(FurnitureList, self).get_object()
-        obj.check_recommendations()
-        print('"""Костыль для перепроверки наличия рекомендаций"""')
+        obj.check_recommendations()  # Костыль для перепроверки наличия рекомендаций
         return obj
 
 
@@ -103,8 +175,6 @@ def choice_list_to_dict(lst_of_tup):
 
 
 
-
-
 class NewsList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     # mixins.CreateModelMixin,
@@ -117,6 +187,12 @@ class NewsList(mixins.ListModelMixin,
 
 
     def get_queryset(self):
+        print('\n\n')
+        self.request.session.save()
+        print(self.request.session.session_key)
+        print(self.request.session)
+        print(self.request.user.pk)
+        print(self.request.user.is_authenticated)
         pk = self.kwargs.get('pk', None)
         if not pk:
             return News.objects.all().order_by('-time_created')
@@ -169,19 +245,6 @@ class SurveyDetail(
     serializer_class = my_serializers.SurveySerializer
     ordering = ['-time_created']
 
-    # def create(self, request, *args, **kwargs):
-    #     print('\nСработал метод create\n')
-    #     request.data['user_id'] = self.request.user.pk
-    #     ret = super(SurveyDetail, self).create(request, *args, **kwargs)
-    #     return ret
-    #
-    #
-    # def update(self, request, *args, **kwargs):
-    #     print('\nСработал метод update\n')
-    #     ret = super(SurveyDetail, self).update(request, *args, **kwargs)
-    #     # print(ret.data)
-    #     return ret
-
     def get_object(self):
         obj = get_object_or_404(Survey, user_id=self.request.user.pk)
         return obj
@@ -209,8 +272,9 @@ class QuestionsList(mixins.ListModelMixin,
 
 #### Loyalty Benefit
 
-class LoyaltyDetail(mixins.ListModelMixin,
-                    # mixins.RetrieveModelMixin,
+class LoyaltyDetail(
+                    # mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
                     # mixins.CreateModelMixin,
                     # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
@@ -219,12 +283,10 @@ class LoyaltyDetail(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated,)
 
 
-    def get_queryset(self):
-        pk = self.request.user.pk
-        queryset = Loyalty.objects.filter(pk=pk)
-        if not queryset:
-            raise Http404
-        return Loyalty.objects.filter(pk=pk)
+    def get_object(self):
+        obj = get_object_or_404(Loyalty, user_id=self.request.user.pk)
+        return obj
+
 
 
 class LoyaltyBenefitUpdate(  # mixins.ListModelMixin,

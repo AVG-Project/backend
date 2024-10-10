@@ -38,19 +38,15 @@ class CustomUserCreationForm(forms.ModelForm):
 
 
 class CustomUserChangeForm(forms.ModelForm):
-    """A form for updating users. Includes all the fields on
-    the user, but replaces the password field with admin's
-    disabled password hash display field.
-    """
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ('email', 'phone', 'password', 'last_name', 'first_name', 'patronymic', 'birth_date', 'is_superuser',
+        fields = ('email', 'phone', 'password', 'last_name', 'first_name', 'patronymic', 'birth_date',
+                  'personal_data_processing', 'mailing', 'registration_by_code', 'is_superuser',
                   'is_staff', 'is_active', 'is_verified')
 
     def save(self, commit=True):
-        # Save the provided password in hashed format
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
         if commit:

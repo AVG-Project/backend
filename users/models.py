@@ -21,7 +21,7 @@ from birthday import BirthdayField
 #     pass
 
 
-
+# from django.contrib.auth.models import User
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     PHONE_REGEX = RegexValidator(
@@ -31,31 +31,39 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     # username = models.CharField('Пользователь', max_length=255, unique=True)
     email = models.EmailField('Email', unique=True)
-    phone = models.CharField(validators=[PHONE_REGEX], max_length=13, unique=True,
-        verbose_name='Ваш номер телефона')
+    phone = models.CharField(validators=[PHONE_REGEX], max_length=13, unique=True, null=True, default=None, blank=True,
+        verbose_name='Номер телефона')
+
+    last_name = models.CharField('Фамилия', max_length=255)
+    first_name = models.CharField('Имя', max_length=255)
+    patronymic = models.CharField('Отчество', max_length=255, blank=True, null=True)
+    birth_date = BirthdayField(verbose_name='Дата рождения')
 
     mailing = models.BooleanField(default=False, verbose_name='Согласие на рассылку', blank=True)
     personal_data_processing = models.BooleanField(default=False, blank=True,
         verbose_name='Согласие на обработку персональных данных')
-    last_name = models.CharField('Фамилия', max_length=255)
-    first_name = models.CharField('Имя', max_length=255)
-    patronymic = models.CharField('Отчество', max_length=255, blank=True)
-    birth_date = BirthdayField(verbose_name='Дата рождения', blank=True, null=True)
+    registration_by_code = models.CharField(verbose_name='(Тех)Код лояльности друга',
+        default=None, null=True, blank=True,
+        help_text='При регистрации пользователь указал код друга посоветовавшего сайт.',
+        max_length=5)
 
     date_joined = models.DateTimeField('Дата регистрации', auto_now_add=True)
 
-    is_superuser = models.BooleanField(default=False, verbose_name='Админ',
+    is_superuser = models.BooleanField(default=False, verbose_name='Админ', blank=True,
         help_text="Полный доступ к инструментам админ панели")  # a superuser
-    is_staff = models.BooleanField("Статус сотрудника", default=False,
+    is_staff = models.BooleanField("Статус сотрудника", default=False, blank=True,
         help_text="Дает возможность посещать админ панель сайта (с ограничением возможностей)")
-    is_active = models.BooleanField("Активный", default=False,
-        help_text="Активный пользователь")
+
+    is_active = models.BooleanField("E-mail подтвержден", default=False)
     is_verified = models.BooleanField('Контактные данные подтверждены', default=False)
 
     objects = UserManager()
 
+    EMAIL_FIELD = "email"
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['phone']
+    # REQUIRED_FIELDS = ['phone']
+    REQUIRED_FIELDS = ['phone', 'last_name', 'first_name', 'birth_date', 'patronymic', 'mailing',
+                       'personal_data_processing', 'registration_by_code']
 
 
     class Meta:
@@ -69,27 +77,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def full_name(self):
         return f"{self.last_name.capitalize()} {self.first_name.capitalize()} {self.patronymic.capitalize()}"
-
-
-    # def has_perm(self, perm, obj=None):
-    #     "Does the user have a specific permission?"
-    #     return self.is_admin
-    #
-    # def has_module_perms(self, app_label):
-    #     "Does the user have permissions to view the app `app_label`?"
-    #     return True
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -154,7 +141,7 @@ class Loyalty(models.Model):
                   'и получение бонусов за приглашение нового пользователя.',
         default=f'Регистрация в системе лояльности {datetime.now().date()}')
 
-    code = models.CharField(max_length=150, verbose_name='Код программы лояльности', unique=True,
+    code = models.CharField(max_length=5, verbose_name='Код программы лояльности', unique=True,
         null=True, blank=True, default=None, validators=[validations.code_validation],
         help_text='(Не обязательное поле. Номер карты создается автоматически.)\n'
                   'Формат: FS5Kl. Только заглавные латинские буквы и цифры.')
@@ -174,8 +161,9 @@ class Loyalty(models.Model):
                   'возможности обменять бонусы на деньги.')
 
     def __str__(self):
-        return f'{self.user.last_name.capitalize()} {self.user.first_name.capitalize()}({self.user.pk})|' \
-               f'Код лояльности - {self.code}'
+        # return f'{self.user.last_name.capitalize()} {self.user.first_name.capitalize()}({self.user.pk})|' \
+        #        f'Код лояльности - {self.code}'
+        return self.code
 
     class Meta:
         verbose_name = "Лояльность"
@@ -267,8 +255,8 @@ class Loyalty(models.Model):
 
     def create_card_number(self):
         while True:
-            digits = self.random_4_digits()
-            card_number = f"{digits} {digits} {digits} {digits}"
+            card_number = f"{self.random_4_digits()} {self.random_4_digits()} " \
+                          f"{self.random_4_digits()} {self.random_4_digits()}"
             if Loyalty.objects.filter(card_number=card_number).exists():
                 continue
             return card_number

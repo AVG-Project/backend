@@ -4,39 +4,79 @@ from users import models as users_models
 from rest_framework.response import Response
 from rest_framework import status, exceptions
 from django.shortcuts import get_object_or_404
-from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError
+from django.http import JsonResponse
 
+from users.managers import UserManager
+# from django.contrib.auth import get_user_model
+# User = get_user_model()
+from users.models import CustomUser as User
 
 
 #### Exceptions
 class SurveyEditException(exceptions.APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = 'Проверьте наличие и правильность вводимых полей'
+
 #### Exceptions
 
+#### User
+class UserDetailSerializer(serializers.ModelSerializer):
 
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'phone', 'last_name', 'first_name', 'patronymic', 'birth_date', 'mailing',
+                  'personal_data_processing', 'registration_by_code', 'is_active', 'is_verified']
+
+class UserCreateSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = User
+        fields = ['email', 'phone', 'password', 'last_name', 'first_name', 'patronymic', 'birth_date', 'mailing',
+                  'personal_data_processing', 'registration_by_code']
+
+    def create(self, validated_data):
+        new_user = super(UserCreateSerializer, self).create(validated_data)
+        new_user.set_password(validated_data.get('password', None))
+        print('\nUserCreateSerializer create()\n')
+        new_user.save()
+
+        return new_user
+
+    def update(self, instance, validated_data):
+        validated_data.pop('password')
+        super(UserCreateSerializer, self).update(instance, validated_data)
+
+        return instance
+
+
+
+#### User
+    # {
+    #     "email": "admin2@mail.ru",
+    #     "phone": "+70000000002",
+    #     "password": "123123xx",
+    #     "last_name": "admin2t",
+    #     "first_name": "admin2t",
+    #     "patronymic": "admin2t",
+    #     "birth_date": "2001-01-01",
+    #     "mailing": false,
+    #     "personal_data_processing": false,
+    #     "registration_by_code": ""
+    # }
+
+
+
+
+#### Furniture
 class TagsSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
 
     class Meta:
         model = models.Tags
         fields = ['id', 'name', 'highlight']
-
-
-# class ProjectImageSerializer(serializers.ModelSerializer):
-#     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
-#
-#     class Meta:
-#         model = models.ProjectImage
-#         fields = ['id', 'image', 'image_medium', 'image_small', 'only_one_image']
-
-
-# class ProjectImageCreateSerializer(serializers.ModelSerializer):
-#     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
-#
-#     class Meta:
-#         model = models.ProjectImage
-#         fields = ['id', 'image']
 
 
 class FurnitureListSerializer(serializers.ModelSerializer):
@@ -48,22 +88,6 @@ class FurnitureListSerializer(serializers.ModelSerializer):
                   'model_3d', 'time_created']
         depth = 1  # для полного отображения моделей M2M
 
-    # def to_representation(self, instance):
-    #
-    #     print('def to_representation\n')
-    #     ret = super(FurnitureListSerializer, self).to_representation(instance)
-    #     recommendations = self.instance.recommendations.all()
-    #     default_rec_len = recommendations.count()
-    #     lack_of_rec = 3 - default_rec_len
-    #     if lack_of_rec <= 0:
-    #         ret['recommendations'] = ExtraFurnitureListSerializer(recommendations, many=True).data
-    #     if lack_of_rec > 0:
-    #         auto_recommendations = self.instance.get_similar(num=lack_of_rec)
-    #         recommendations = recommendations.union(auto_recommendations)
-    #         ret['recommendations'] = ExtraFurnitureListSerializer(recommendations.order_by('-id'), many=True).data
-    #
-    #     return ret
-
 
 class ExtraFurnitureListSerializer(serializers.ModelSerializer):
     recommendations = FurnitureListSerializer(read_only=True, many=True)
@@ -73,24 +97,26 @@ class ExtraFurnitureListSerializer(serializers.ModelSerializer):
         fields = ['id', 'category', 'name', 'tags', 'text', 'price', 'images',
                   'model_3d', 'time_created', 'recommendations']
         depth = 1  # для полного отображения моделей M2M
+#### Furniture
 
-
-
+#### NewsList
 class NewsListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.News
         fields = ['id', 'title', 'text', 'time_created', 'image']
+#### NewsList
 
-
+#### OrdersList
 class OrdersListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Order
         fields = ['id', 'number', 'create_date', 'shipment_date', 'status', 'address', 'contract', 'images']
         depth = 1  # для полного отображения моделей M2M
+#### OrdersList
 
-
+#### Application
 class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -98,8 +124,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
         fields = ['id', 'time_created', 'user', 'text', 'last_name', 'first_name', 'patronymic', 'phone',
                   'contact_type', 'link', 'date_time', 'python_date_time']
         # depth = 1  # для полного отображения моделей M2M
-
-
+#### Application
 
 #### Сериализаторы Опросника
 class OptionSerializer(serializers.ModelSerializer):
@@ -213,7 +238,7 @@ class SurveySerializer(serializers.ModelSerializer):
 
         try:
             dependable = validated_data.pop('dependable')
-            models.Survey.objects.update(dependable=dependable)
+            models.Survey.objects.update(dependable=dependable)  #todo проверить вроден не должно пахать
             question_and_answers = self.initial_data.pop('question_and_answers')
         except Exception:
             raise Http404("Возможные ошибки: "
@@ -257,15 +282,7 @@ class SurveySerializer(serializers.ModelSerializer):
                 new.answers.set(answers)
 
         return instance
-
-        
-        
-
-        
-    
-    
 #### Сериализаторы Опросника
-
 
 #### Loyalty Benefit Offer(User_app)
 class BenefitSerializer(serializers.ModelSerializer):
@@ -308,19 +325,14 @@ class LoyaltyBenefitSerializer(serializers.ModelSerializer):
         model = users_models.LoyaltyBenefit
         fields = ['id', 'benefit']
         # depth = 1
-
-#### Loyalty Benefit (User_app)
-
+#### Loyalty Benefit Offer(User_app)
 
 #### WebsiteSettings
-
 class WebsiteSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.WebsiteSettings
         fields = ['name', 'min_write_time']
         depth = 1
-
-
 #### WebsiteSettings
 
 

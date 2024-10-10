@@ -157,7 +157,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'Etc/GMT+3'
 
 USE_I18N = True
 
@@ -229,16 +229,54 @@ AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend', "django.contrib.auth.ba
 
 # DJOSER
 DJOSER = {
+    "USER_ID_FIELD": "pk",
+    'LOGIN_FIELD': 'email',
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+
     'USER_CREATE_PASSWORD_RETYPE': True,
-    # 'SEND_ACTIVATION_EMAIL': True,
+
+    'SEND_ACTIVATION_EMAIL': True,
+    # "SEND_CONFIRMATION_EMAIL": True,
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
     'TOKEN_MODEL': None,  # We use only JWT
+
     'ACTIVATION_URL': 'auth/verify/{uid}/{token}/',
+    "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
+    # "USERNAME_RESET_CONFIRM_RETYPE": True,
+
+    # "EMAIL": {"activation": "base.emails.ActivationEmail"},
+    'SERIALIZERS': {
+        'user_create': 'api.serializers.UserCreateSerializer',
+        'current_user': 'api.serializers.UserDetailSerializer',
+        'user': 'api.serializers.UserDetailSerializer',
+
+        # 'activation': 'djoser.serializers.ActivationSerializer',
+        # 'password_reset': 'djoser.serializers.SendEmailResetSerializer',
+        # 'password_reset_confirm': 'djoser.serializers.PasswordResetConfirmSerializer',
+        # 'password_reset_confirm_retype': 'djoser.serializers.PasswordResetConfirmRetypeSerializer',
+        # 'set_password': 'djoser.serializers.SetPasswordSerializer',
+        # 'set_password_retype': 'djoser.serializers.SetPasswordRetypeSerializer',
+        # 'set_username': 'djoser.serializers.SetUsernameSerializer',
+        # 'set_username_retype': 'djoser.serializers.SetUsernameRetypeSerializer',
+        # 'username_reset': 'djoser.serializers.SendEmailResetSerializer',
+        # 'username_reset_confirm': 'djoser.serializers.UsernameResetConfirmSerializer',
+        # 'username_reset_confirm_retype': 'djoser.serializers.UsernameResetConfirmRetypeSerializer',
+
+        # 'user_create_password_retype': 'djoser.serializers.UserCreatePasswordRetypeSerializer',
+        # 'user_delete': 'djoser.serializers.UserDeleteSerializer',
+
+
+        # 'token': 'djoser.serializers.TokenSerializer',
+        # 'token_create': 'djoser.serializers.TokenCreateSerializer',
+        },
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -266,7 +304,7 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=50),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
@@ -276,26 +314,17 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
 #### auth
 
-#### EMAIL
-# настройки вашего SMTP сервера
-EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_FROM_ADDRESS = os.getenv('EMAIL_FROM_ADDRESS')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 
+#### EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.yandex.ru'
-# EMAIL_PORT = 465
-# EMAIL_HOST_USER = 'django-auth@kantegory.me'
-# EMAIL_HOST_PASSWORD = 'secret123'
-# EMAIL_USE_SSL = True
-# DEFAULT_FROM_EMAIL = 'django-auth@kantegory.me'
-#### EMAIL
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 2525
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
