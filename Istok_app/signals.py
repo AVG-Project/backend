@@ -13,7 +13,10 @@ from django.db.models.signals import ModelSignal
 @receiver(post_save, sender=models.Order)
 def create_order(sender, instance, created, **kwargs):
     friends_code = instance.loyalty_code
-    code_not_same = bool(friends_code != instance.user.loyalty.code)
+    if user_models.Loyalty.objects.filter(user=instance.user).exists():
+        code_not_same = bool(friends_code != instance.user.loyalty.code)
+    else:
+        code_not_same = True
     if friends_code and code_not_same:
         friends_loyalty = user_models.Loyalty.objects.filter(code=friends_code).first()
         buyer_loyalty = instance.user.loyalty
