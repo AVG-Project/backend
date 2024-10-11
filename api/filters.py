@@ -1,5 +1,5 @@
 from django_filters import FilterSet
-from Istok_app.models import Furniture
+from Istok_app import models
 from django_filters import rest_framework as filters
 
 
@@ -15,7 +15,16 @@ class FurnitureFilter(filters.FilterSet):
 
 
     class Meta:
-        model = Furniture
+        model = models.Furniture
         fields = ['min_price', 'max_price', 'tags_name', 'category', 'tags']
+
+
+class OrderFilter(filters.FilterSet):
+    status = filters.CharFilter(field_name='status', lookup_expr='exact')
+
+
+    class Meta:
+        model = models.Order
+        fields = ['status']
 
 

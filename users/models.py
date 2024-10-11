@@ -17,10 +17,6 @@ from datetime import datetime
 from birthday import BirthdayField
 
 
-# class CustomUser(AbstractUser):
-#     pass
-
-
 # from django.contrib.auth.models import User
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -37,7 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField('Фамилия', max_length=255)
     first_name = models.CharField('Имя', max_length=255)
     patronymic = models.CharField('Отчество', max_length=255, blank=True, null=True)
-    birth_date = BirthdayField(verbose_name='Дата рождения')
+    birth_date = BirthdayField(verbose_name='Дата рождения', null=True)
 
     mailing = models.BooleanField(default=False, verbose_name='Согласие на рассылку', blank=True)
     personal_data_processing = models.BooleanField(default=False, blank=True,
@@ -61,7 +57,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = 'email'
-    # REQUIRED_FIELDS = ['phone']
     REQUIRED_FIELDS = ['phone', 'last_name', 'first_name', 'birth_date', 'patronymic', 'mailing',
                        'personal_data_processing', 'registration_by_code']
 
@@ -69,7 +64,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        # unique_together = ('username', 'email', 'phone')
 
     def __str__(self):
         return self.email
@@ -77,7 +71,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def full_name(self):
         return f"{self.last_name.capitalize()} {self.first_name.capitalize()} {self.patronymic.capitalize()}"
-
 
 
 class Offer(models.Model):
@@ -123,12 +116,21 @@ class Loyalty(models.Model):
                 "0000 0000 0000 0000")
 
     user = models.OneToOneField('CustomUser', on_delete=models.CASCADE, verbose_name='Пользователь', primary_key=True)
+    code = models.CharField(max_length=5, verbose_name='Код программы лояльности', unique=True,
+        null=True, blank=True, default=None, validators=[validations.code_validation],
+        help_text='(Не обязательное поле. Номер карты создается автоматически.)\n'
+                  'Формат: FS5Kl. Только заглавные латинские буквы и цифры.')
+
+    card_number = models.CharField(max_length=19, verbose_name='Номер карты лояльности', unique=True,
+        null=True, blank=True, default=None, validators=[CARD_REGEX],
+        help_text='(Не обязательное поле. Номер карты создается автоматически.)\n'
+                  'Формат: 0000 0000 0000 0000. Только цифры и пробелы.')
     time_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     balance = models.IntegerField(default=0, verbose_name='Баланс', blank=True)
     balance_history = models.TextField(verbose_name='(Тех)Статистика бонусного счета', blank=True,
         help_text='В данном тексте будет автоматически сохраняться история выбора выгод пользователя',
-        default=f'Регистрация в системе лояльности {datetime.now().date()}')
+        default=f'\nРегистрация в системе лояльности {datetime.now().date()}')
 
     offers = models.ManyToManyField('Offer', through='LoyaltyOffer',
         related_name='offers', verbose_name='Персональные предложения',
@@ -139,17 +141,8 @@ class Loyalty(models.Model):
     benefits_history = models.TextField(verbose_name='(Тех)История выбора выгод счета', blank=True,
         help_text='В данном тексте будет автоматически сохраняться история выбора выгод пользователя, '
                   'и получение бонусов за приглашение нового пользователя.',
-        default=f'Регистрация в системе лояльности {datetime.now().date()}')
+        default=f'\nРегистрация в системе лояльности {datetime.now().date()}')
 
-    code = models.CharField(max_length=5, verbose_name='Код программы лояльности', unique=True,
-        null=True, blank=True, default=None, validators=[validations.code_validation],
-        help_text='(Не обязательное поле. Номер карты создается автоматически.)\n'
-                  'Формат: FS5Kl. Только заглавные латинские буквы и цифры.')
-
-    card_number = models.CharField(max_length=19, verbose_name='Номер карты лояльности', unique=True,
-        null=True, blank=True, default=None, validators=[CARD_REGEX],
-        help_text='(Не обязательное поле. Номер карты создается автоматически.)\n'
-                  'Формат: 0000 0000 0000 0000. Только цифры и пробелы.')
 
     friends_loyalty_used = models.BooleanField(default=False, blank=True,
         verbose_name='(Тех)Использован код друга', help_text='Чужим кодом можно воспользоваться лишь раз.')
@@ -161,8 +154,6 @@ class Loyalty(models.Model):
                   'возможности обменять бонусы на деньги.')
 
     def __str__(self):
-        # return f'{self.user.last_name.capitalize()} {self.user.first_name.capitalize()}({self.user.pk})|' \
-        #        f'Код лояльности - {self.code}'
         return self.code
 
     class Meta:
@@ -185,22 +176,19 @@ class Loyalty(models.Model):
         diff = 5000 - self.bonus_from_reference
         if diff > 0:
             remain = diff // 100
-            text_to_user = f'Дата:{datetime.now().date().strftime("%d-%m-%Y")}\n' \
-                           f'Вашей пригласительной ссылкой для регистрации воспользовались.' \
-                           f'Вы получаете 100 бонусов(рублей).\n' \
+            text_to_user = f'Дата:{datetime.now().date().strftime("%d-%m-%Y")} +100 бонусов за приглашение!\n' \
                            f'Если пригласите еще {remain} пользователей, сможете снять 5000 рублей наличными\n\n'
-            self.benefits_history = text_to_user + self.benefits_history
+            self.balance_history = text_to_user + self.balance_history
             self.save()
 
-        if diff == 0:
-            text_to_user = f'Дата:{datetime.now().date().strftime("%d-%m-%Y")}\n' \
+        elif diff == 0:
+            text_to_user = f'Дата:{datetime.now().date().strftime("%d-%m-%Y")} +100 бонусов за приглашение!\n' \
                            f'Вы пригласили 50 человек на регистрацию!!\n' \
                            f'Большое спасибо Вам за рекламу нашего сайта! ' \
                            f'Вы имеете право снять 5000 рублями с бонусного счета\n' \
-                           f'С вами в ближайшее время свяжутся для перевода денег.'
-            self.benefits_history = text_to_user + self.benefits_history
-            text = f'+ 100 бонусов за приглашение на регистрацию. Баланс:{self.balance}\n'
-            self.balance_history = text + self.benefits_history
+                           f'С вами в ближайшее время свяжутся для перевода денег.\n\n'
+            self.balance_history = text_to_user + self.balance_history
+            self.bonus_from_reference -= 5000
             self.save()
             text_to_staff = f'Пользователь {self.show_user_name()}(код лояльности {self.code}), ' \
                             f'пригласил 50 пользователей для ' \
@@ -209,13 +197,7 @@ class Loyalty(models.Model):
             # todo f'Данные пользователя:'
             print(text_to_staff)
             # todo send_mail_staff
-            # todo send_email_user
-        if diff < 0:
-            text_to_user = f'Дата:{datetime.now().date().strftime("%d-%m-%Y")}\n' \
-                           f'Вашей пригласительной ссылкой для регистрации воспользовались.' \
-                           f'Вы получаете 100 бонусов(рублей).\n\n'
-            self.benefits_history = text_to_user + self.benefits_history
-            self.save()
+            # todo send_mail_user
 
     def new_benefits_count(self):
         return self.loyaltybenefit_set.all().filter(benefit=None).count()

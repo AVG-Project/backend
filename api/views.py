@@ -20,7 +20,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import FurnitureFilter
+from .filters import FurnitureFilter, OrderFilter
 from rest_framework.filters import OrderingFilter  # если импортировать по другому будет ошибка
 from rest_framework import serializers
 from django.http import Http404, HttpResponseForbidden
@@ -201,11 +201,12 @@ class NewsList(mixins.ListModelMixin,
 
 class OrdersList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
-                    mixins.CreateModelMixin,
-                    mixins.UpdateModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
     serializer_class = my_serializers.OrdersListSerializer
+    filterset_class = OrderFilter
     ordering = ['-create_date']
 
 
@@ -250,7 +251,6 @@ class SurveyDetail(
         return obj
 
 
-
 class QuestionsList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     # mixins.CreateModelMixin,
@@ -260,6 +260,7 @@ class QuestionsList(mixins.ListModelMixin,
 
     serializer_class = my_serializers.QuestionSerializer
     ordering = ['id']
+
 
     def get_queryset(self):
         pk = self.kwargs.get('pk', None)

@@ -1,5 +1,5 @@
 from django.core.mail import send_mail
-from django.db.models.signals import post_save, m2m_changed, post_delete, pre_delete
+from django.db.models.signals import post_save, m2m_changed, post_delete, pre_delete, pre_save
 from django.dispatch import receiver
 
 from . import models
@@ -63,36 +63,28 @@ def loyalty_benefit_change(sender, instance, created, **kwargs):
 @receiver(post_save, sender=models.Survey)
 def auto_create_loyalty(sender, instance, created, **kwargs):
     if created:
-        try:
-            user_models.Loyalty.objects.create(user=instance.user)
-            print('\nauto_create_loyalty\n')
-        except Exception as e:
-            # todo send_mail_admin
-            print(e)
+        if not user_models.Loyalty.objects.filter(user=instance.user).exists():
+            try:
+                user_models.Loyalty.objects.create(user=instance.user)
+                print('\nauto_create_loyalty\n')
+            except Exception as e:
+                # todo send_mail_admin
+                print(e)
 
 
-
-
-# # @receiver(m2m_changed, sender=models.Furniture)
 @receiver(post_save, sender=models.Furniture)
 def auto_recommendation(sender, instance, created, **kwargs):
     instance.check_recommendations()
 
 
+@receiver(post_save, sender=models.Question)
+def new_question(sender, instance, created, **kwargs):
+    if created:
+        for model in models.Survey.objects.all():
+            # model.new_questions += f' {instance.pk}'
+            model.check_questions()
 
-#     if created:
-#         try:
-#             code = instance.order_by_loyalty_code.loyalty_code
-#         except Exception:
-#             code = ''
-#
-#         if code:
-#             order_user = instance.order_user
-#             orders_quantity = len(Orders.objects.filter(order_user=order_user))
-#             loyalty = Loyalty.objects.filter(loyalty_code=code).first()
-#             if orders_quantity == 1 and loyalty:
-#                 if order_user != loyalty.user:
-#                     loyalty.increase_balance(instance.order_price)
+
 
 
 # @receiver(post_save, sender=Application)

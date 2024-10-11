@@ -169,6 +169,7 @@ USE_TZ = True
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/www/u2728036/data/www/leshiy.fun/static/'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -229,20 +230,20 @@ AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend', "django.contrib.auth.ba
 
 # DJOSER
 DJOSER = {
-    "USER_ID_FIELD": "pk",
+    # "USER_ID_FIELD": "pk",
     'LOGIN_FIELD': 'email',
-    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
 
-    'USER_CREATE_PASSWORD_RETYPE': True,
-
-    'SEND_ACTIVATION_EMAIL': True,
-    # "SEND_CONFIRMATION_EMAIL": True,
-    'SET_PASSWORD_RETYPE': True,
-    'PASSWORD_RESET_CONFIRM_RETYPE': True,
     'TOKEN_MODEL': None,  # We use only JWT
 
+    "SEND_CONFIRMATION_EMAIL": True,
+    'SEND_ACTIVATION_EMAIL': True,
     'ACTIVATION_URL': 'auth/verify/{uid}/{token}/',
+
+    'SET_PASSWORD_RETYPE': True,
+    'USER_CREATE_PASSWORD_RETYPE': True,
     "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
 
     'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
     "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",

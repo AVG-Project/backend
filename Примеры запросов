@@ -16,7 +16,7 @@
                     "user_answer": false
                 },
                 {
-                    "text": "ГамакТЕСТ!!!",
+                    "text": "Гамак",
                     "user_answer": true
                 }
             ]
@@ -31,7 +31,7 @@
                     "user_answer": false
                 },
                 {
-                    "text": "Цена!!!",
+                    "text": "Цена",
                     "user_answer": false
                 }
             ]

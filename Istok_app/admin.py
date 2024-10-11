@@ -4,11 +4,12 @@ from Istok_app import models
 
 
 istok_app_models = [models.Tags, models.News, models.ProjectImage, models.Application, models.FurnitureCategory,
-                    models.Option, models.Answer]
+                    models.Option, models.Answer, models.Order_Document]
 
 admin.site.register(istok_app_models)
 
 
+#### Settings
 @admin.register(models.WebsiteSettings)
 class WebsiteSettingsAdmin(admin.ModelAdmin):
     model = models.WebsiteSettings
@@ -20,17 +21,8 @@ class WebsiteSettingsAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+#### Settings
 
-# class FurnitureInline(admin.TabularInline):
-#     model = Furniture.tags.through
-#
-#
-# @admin.register(Tags)
-# class TagsAdmin(admin.ModelAdmin):
-#     model = Tags
-#     inlines = [
-#         FurnitureInline,
-#     ]
 
 #### Furniture
 class TagsInstanceInline(admin.TabularInline):
@@ -54,17 +46,20 @@ class FurnitureAdmin(admin.ModelAdmin):
 
 #### Order
 class OrderImagesInline(admin.TabularInline):
-    model = models.OrderImage
+    model = models.Order_Image
+
+class OrderDocsInline(admin.TabularInline):
+    model = models.Order_Document
 
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
     model = models.Order
     list_display = ['number', 'user', 'id', 'create_date', 'shipment_date', 'status', 'address']
-    inlines = [OrderImagesInline]
+    inlines = [OrderImagesInline, OrderDocsInline]
 #### Order
 
 
-#### Order
+#### Question
 class QuestionOptionInline(admin.TabularInline):
     model = models.QuestionOption
 
@@ -73,47 +68,45 @@ class QuestionAdmin(admin.ModelAdmin):
     model = models.Question
     list_display = ['text', 'id']
     inlines = [QuestionOptionInline]
-#### Order
+#### Question
 
 
 #### QuestionAndAnswer
-class AnswerQuestionAndAnswerInline(admin.TabularInline):
-    model = models.AnswerQuestionAndAnswer
-
-@admin.register(models.QuestionAndAnswer)
-class QuestionAndAnswerAdmin(admin.ModelAdmin):
-    model = models.QuestionAndAnswer
-    list_display = ['survey', 'question', 'id']
-    inlines = [AnswerQuestionAndAnswerInline]
+# class AnswerQuestionAndAnswerInline(admin.TabularInline):
+#     model = models.AnswerQuestionAndAnswer
+#
+# @admin.register(models.QuestionAndAnswer)
+# class QuestionAndAnswerAdmin(admin.ModelAdmin):
+#     model = models.QuestionAndAnswer
+#     list_display = ['survey', 'question', 'id']
+#     inlines = [AnswerQuestionAndAnswerInline]
+#
+#     def has_change_permission(self, request, obj=None):
+#         return False
 #### QuestionAndAnswer
 
 
 #### Survey
-# class QuestionAndAnswerInline(admin.TabularInline):
-#     model = models.QuestionAndAnswer
+class QuestionAndAnswerInline(admin.TabularInline):
+    model = models.QuestionAndAnswer
+    can_delete = False
+    fields = ['__str__']
+    readonly_fields = ['__str__']
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 @admin.register(models.Survey)
 class SurveyAdmin(admin.ModelAdmin):
     model = models.Survey
     list_display = ['user', 'time_created', 'show_info']
+    inlines = [QuestionAndAnswerInline]
 
-    # def save_model(self, request, obj, form, change):
-    #     """
-    #     Given a model instance save it to the database.
-    #     """
-    #     update_fields = set()
-    #     if change:
-    #         for key, value in form.cleaned_data.items():
-    #             # assuming that you have ManyToMany fields that are called groups and user_permissions
-    #             # we want to avoid adding them to update_fields
-    #             if key in ['user_permissions', 'groups']:
-    #                 continue
-    #             if value != form.initial[key]:
-    #                 update_fields.add(key)
-    #
-    #     obj.save(update_fields=update_fields)
-        
-        
+    # def has_change_permission(self, request, obj=None):
+    #     return False
 #### Survey
 
 
