@@ -3,12 +3,31 @@ from Istok_app import models
 
 
 
+<<<<<<< Updated upstream
 istok_app_models = [models.Tags, models.News, models.ProjectImage, models.Application, models.FurnitureCategory,
                     models.Option, models.Answer]
+=======
+istok_app_models = [models.Tags, models.News, models.ProjectImage, models.FurnitureCategory,
+                    models.Option, models.Answer, models.Order_Document]
+>>>>>>> Stashed changes
 
 admin.site.register(istok_app_models)
 
 
+<<<<<<< Updated upstream
+=======
+#### Application
+@admin.register(models.Application)
+class ApplicationAdmin(admin.ModelAdmin):
+    model = models.Application
+    list_display = ['date_time', 'phone', "status", 'id']
+    list_filter = ('status',)
+#### Application
+
+
+
+#### Settings
+>>>>>>> Stashed changes
 @admin.register(models.WebsiteSettings)
 class WebsiteSettingsAdmin(admin.ModelAdmin):
     model = models.WebsiteSettings

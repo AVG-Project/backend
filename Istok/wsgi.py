@@ -14,3 +14,14 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Istok.settings')
 
 application = get_wsgi_application()
+
+# #### https://noumenal.es/notes/til/django/csrf-trusted-origins/
+# django_app = get_wsgi_application()
+#
+#
+# def https_app(environ, start_response):
+#     environ["wsgi.url_scheme"] = "https"
+#     return django_app(environ, start_response)
+#
+#
+# application = https_app

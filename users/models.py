@@ -1,10 +1,24 @@
 from birthday import BirthdayField
 from django.db import models
+<<<<<<< Updated upstream
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
+=======
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
+from django.core.mail import send_mail
+from Istok.settings import SERVER_EMAIL, EMAIL_ADMIN
+
+>>>>>>> Stashed changes
 import random
 from . import validations
+<<<<<<< Updated upstream
 import string
+=======
+from .managers import UserManager
+# from users import service
+
+>>>>>>> Stashed changes
 from django.core.validators import RegexValidator
 from django.core.validators import MinLengthValidator, MinValueValidator, MaxValueValidator
 from django.utils import timezone
@@ -51,9 +65,9 @@ class Offer(models.Model):
 
     def __str__(self):
         if self.offer_to_all:
-            text = f'(не выбирать)Предложение и так есть у всех!({self.pk}){self.title[:15]}'
+            text = f'(не выбирать)Предложение и так есть у всех!({self.id}){self.title[:15]}'
         else:
-            text = f'({self.pk}){self.title[:15]}'
+            text = f'({self.id}){self.title[:15]}'
         return text
 
     class Meta:
@@ -67,7 +81,7 @@ class LoyaltyOffer(models.Model):
     offer = models.ForeignKey('Offer', on_delete=models.CASCADE, verbose_name='Предложение')
 
     def __str__(self):
-        return f'({self.pk})|Loyalty({self.loyalty.pk})|Offer({self.offer.pk})'
+        return f'({self.id})|Loyalty({self.loyalty.id})|Offer({self.offer.id})'
 
     class Meta:
         # Для уникальности м2м
@@ -138,7 +152,7 @@ class Loyalty(models.Model):
             dct = None
         return dct
 
-    #todo данную функцию запускать из сигнала регистрации
+
     def increase_bonus_from_reference(self, user=None):
         self.bonus_from_reference += 100
         self.balance += 100
@@ -163,6 +177,7 @@ class Loyalty(models.Model):
             text = f'+ 100 бонусов за приглашение на регистрацию. Баланс:{self.balance}\n'
             self.balance_history = text + self.benefits_history
             self.save()
+<<<<<<< Updated upstream
             text_to_staff = f'Пользователь {self.show_user_name()}(код лояльности {self.code}), ' \
                             f'пригласил 50 пользователей для ' \
                             f'регистрации и опроса. Он имеет имеет право снять 5000 рублей с бонусного счета.\n' \
@@ -177,6 +192,23 @@ class Loyalty(models.Model):
                            f'Вы получаете 100 бонусов(рублей).\n\n'
             self.benefits_history = text_to_user + self.benefits_history
             self.save()
+=======
+
+            subject = f'Пользователь пригласил 50 других пользователей.'
+            all_registered_users = CustomUser.objects.filter(registration_by_code=self.code)
+            values = all_registered_users.values_list('email', 'date_joined')
+            users = '\n'.join([f"{_[0]} {_[1].date()}" for _ in values])
+            message = f'Пользователь {self.user.email}(Код лояльности:{self.code}) накопил 5000 бонусов за ' \
+                      f'приглашение на регистрацию других пользователей. \n' \
+                      f'Он имеет право снять с бонусного счета 5000 рублей.' \
+                      f'Вы можете проверить список приглашенных пользователей на возможность накрутки\n' \
+                      f'Список приглашенных пользователей (Email (Дата регистрации)):\n{users}'
+
+            print(subject, message, staff_email_list(), sep='\n')
+            # todo Включить
+            # send_mail(subject, message, SERVER_EMAIL, staff_email_list())
+
+>>>>>>> Stashed changes
 
     def new_benefits_count(self):
         return self.loyaltybenefit_set.all().filter(benefit=None).count()
@@ -243,7 +275,7 @@ class Benefit(models.Model):
         help_text='Включите эту опцию если выбранную выгоду должен выдать лично сотрудник')
 
     def __str__(self):
-        return f'({self.pk}){self.title}'
+        return f'({self.id}){self.title}'
 
     class Meta:
         verbose_name = "Выгода"
@@ -267,10 +299,10 @@ class LoyaltyBenefit(models.Model):
         help_text='Три статуса процесса выдачи награды. Если выбрали начисление бонусов автоматически "Завершен"')
 
     def __str__(self):
-        return f'{self.loyalty.code}-{self.benefit}({self.status})'
+        return f'(id{self.id}){self.loyalty.code}-{self.benefit}({self.status})'
 
     class Meta:
-        verbose_name = "(m2m) Выбранная выгода"
+        verbose_name = "(m2m) (m2m) Выбранная выгода"
         verbose_name_plural = "(m2m) Выбранная выгода"
 
 # # m2m
@@ -290,6 +322,8 @@ class LoyaltyBenefit(models.Model):
 #     #     verbose_name_plural = "Изображения для мебели"
 
 
+def staff_email_list():
+    return CustomUser.objects.filter(is_staff=True, is_superuser=False).values_list('email', flat=True)
 # для быстрого подключения в консоли
 # from django.contrib.auth.models import User
 # from users.models import Loyalty, Profile

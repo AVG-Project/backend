@@ -1,0 +1,40 @@
+1. В settings
+    MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
+    Выключать дебаг режим
+2. Проверить наличие env
+
+
+####
+ python manage.py check --deploy
+
+
+
+
+
+
+
+
+
+
+####
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+
+CSRF_TRUSTED_ORIGINS = ['http://91.197.98.22', 'https://91.197.98.22',
+                        'http://91.197.98.22:8001', 'https://91.197.98.22:8001',
+                        'http://*.91.197.98.22', 'https://*.91.197.98.22',
+                        'http://*.91.197.98.22:8001', 'https://*.91.197.98.22:8001',
+                        'http://127.0.0.1:8000']
+
+# CSRF_USE_SESSIONS = True
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTOCOL", "https")
+# print('\n!!! SECURE_PROXY_SSL_HEADER == ', SECURE_PROXY_SSL_HEADER)
+# SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SAMESITE = 'None'
+# CSRF_COOKIE_SECURE = True
+
+DOMAIN = 'istok-topaz.vercel.app'  # example.com  #! loc
+SITE_NAME = 'istok'
+SECURE_SSL_REDIRECT = False  #! loc
+####

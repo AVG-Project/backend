@@ -25,19 +25,78 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+
+#### dev-prod
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  #! loc
-# DEBUG = False  #! hosting
+# DEBUG = True  #! loc
+# # DEBUG = False  #! hosting
+# DOMAIN = 'istok-topaz.vercel.app'  #example.com  #! loc
+# SITE_NAME = 'istok'  #Example #!
+# # SECURE_SSL_REDIRECT = True
+#
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+#
+# ALLOWED_HOSTS = ["127.0.0.1", "team19.pythonanywhere.com", 'leshiy.fun', 'www.leshiy.fun', 'http://localhost:3000/',
+#                  '46.31.26.194', '46.39.249.96', "http://127.0.0.1:3000"]
+#
+# CORS_ALLOWED_ORIGINS = ["https://localhost:3000", 'https://leshiy.fun']
+# CORS_ALLOW_CREDENTIALS = True
+############
+# DEBUG = True  #! loc
+DEBUG = False  #! hosting
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+DOMAIN = 'istok-topaz.vercel.app'  #example.com  #! loc
+SITE_NAME = 'istok'  #Example #!
+# SECURE_SSL_REDIRECT = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "team19.pythonanywhere.com", 'leshiy.fun', 'www.leshiy.fun', 'http://localhost:3000/',
-                 '46.31.26.194', '46.39.249.96', "http://127.0.0.1:3000"]
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_DOMAIN = '91.197.98.22'
+CSRF_TRUSTED_ORIGINS = ["http://91.197.98.22", "https://91.197.98.22"]
 
+<<<<<<< Updated upstream
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000", 'https://leshiy.fun']
+=======
+# ALLOWED_HOSTS = ["127.0.0.1", '91.197.98.22', '46.31.26.194', '46.39.249.96', "http://127.0.0.1:3000", 'http://localhost:3000/', 'localhost', "team19.pythonanywhere.com", 'leshiy.fun', 'www.leshiy.fun', 'django']
+
+ALLOWED_HOSTS = ['*']
+
+CORS_ALLOWED_ORIGINS = ["https://localhost:3000", 'https://leshiy.fun', 'http://91.197.98.22',
+                        'http://91.197.98.22:8000', 'http://django']
+>>>>>>> Stashed changes
 CORS_ALLOW_CREDENTIALS = True
-# Application definition
+####
+
+#### Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATIC_URL = '/static/'
+# STATIC_ROOT = '/var/www/u2728036/data/www/leshiy.fun/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+STATIC_URL = '/static/'
+STATIC_ROOT = 'static'
+# STATIC_ROOT = '/var/www/staticfiles/'
+# STATICFILES_DIRS = [BASE_DIR / 'static', '/Istok/static']
+# print('STATICFILES_DIRS == ', STATICFILES_DIRS)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_ROOT = '/var/www/media/'
+MEDIA_URL = 'media/'  #! loc
+# MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+####
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -45,6 +104,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
 
     'debug_toolbar',
@@ -54,7 +114,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'bootstrap4',
     'crispy_bootstrap4',
-
 
     'users.apps.UsersConfig',
 
@@ -67,6 +126,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # выше CommonMiddleware
     'django.middleware.common.CommonMiddleware',
@@ -162,6 +222,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+<<<<<<< Updated upstream
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -173,6 +234,8 @@ STATIC_ROOT = '/var/www/u2728036/data/www/leshiy.fun/static/'
 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+=======
+>>>>>>> Stashed changes
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -189,9 +252,6 @@ EMAIL_USE_SSL = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'  #! loc
-# MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
 
 ########## rest
 LOGIN_URL = 'login'
@@ -215,6 +275,7 @@ REST_FRAMEWORK = {
     # ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
+<<<<<<< Updated upstream
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -228,3 +289,106 @@ INTERNAL_IPS = [
 ]
 ##########
 # AUTH_USER_MODEL = 'users.CustomUser'
+=======
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',  #! loc
+        'rest_framework.authentication.BasicAuthentication',  #! loc
+        'rest_framework.authentication.SessionAuthentication',  #! loc  # работает в BrowsableAPIRenderer.
+    ],
+}
+#### rest
+
+
+
+#### auth
+AUTH_USER_MODEL = 'users.CustomUser'
+AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend', "django.contrib.auth.backends.ModelBackend", )
+        #ModelBackend для админ панели
+
+# DJOSER
+
+
+DJOSER = {
+    # "USER_ID_FIELD": "pk",
+    'LOGIN_FIELD': 'email',
+
+    'TOKEN_MODEL': None,  # We use only JWT
+
+    "SEND_CONFIRMATION_EMAIL": True,
+    'SEND_ACTIVATION_EMAIL': True,
+    'ACTIVATION_URL': 'auth/verify/{uid}/{token}/',
+
+    'SET_PASSWORD_RETYPE': True,
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    "PASSWORD_RESET_CONFIRM_URL": "auth/recover/3/{uid}/{token}",
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+
+    # 'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    # "USERNAME_RESET_CONFIRM_URL": "email/reset/confirm/{uid}/{token}",
+    # "USERNAME_RESET_CONFIRM_RETYPE": True,
+    # "SET_USERNAME_RETYPE": True,
+
+    # "EMAIL": {"activation": "base.emails.ActivationEmail"},
+
+    'SERIALIZERS': {
+        'user_create': 'api.serializers.UserCreateSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
+        'user': 'api.serializers.CustomUserSerializer',
+        },
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    "JTI_CLAIM": "jti",
+
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=50),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
+    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
+    "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
+    "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+#### auth
+
+
+#### EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 2525
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
+>>>>>>> Stashed changes

@@ -1,4 +1,0 @@
-1. В settings
-    MEDIA_URL = 'https://www.leshiy.fun/Istok/media/'  #! hosting
-    Выключать дебаг режим
-2. Проверить наличие env

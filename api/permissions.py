@@ -18,3 +18,20 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         #! Если у объекта есть поле создателя
         return obj.user == request.user
 
+<<<<<<< Updated upstream
+=======
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+
+        #! Если у объекта есть поле создателя
+        return obj.user == request.user
+
+
+
+class SameUser(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+
+        #! Если у объекта есть поле создателя
+        return bool(obj == request.user)
+
+>>>>>>> Stashed changes

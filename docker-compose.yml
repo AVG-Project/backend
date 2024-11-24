@@ -1,0 +1,11 @@
+
+services:
+  istok_api:
+    build:
+      context: .
+    container_name: istok_api
+    ports:
+      - '8001:8000'
+#    volumes:
+#      - ./staticfiles:/var/www/staticfiles/
+#      - ./media:/var/www/media/
