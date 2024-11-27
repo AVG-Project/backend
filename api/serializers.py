@@ -15,6 +15,84 @@ class SurveyEditException(exceptions.APIException):
 #### Exceptions
 
 
+<<<<<<< Updated upstream
+=======
+#### User
+class CustomUserSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'phone', 'last_name', 'first_name', 'patronymic', 'birth_date', 'mailing',
+                  'personal_data_processing', 'registration_by_code', 'is_active', 'is_verified']
+
+    def update(self, instance, validated_data):
+        # print('\n!! CustomUserSerializer update\n')
+        email_field = 'email'
+        instance.email_changed = False
+        if email_field in validated_data:
+            # print('\nemail_field in validated_data = ', )
+            # print('instance.email = ', instance.email)
+            # print('validated_data[email_field] = ', validated_data[email_field])
+            instance_email = instance.email
+            if instance_email != validated_data[email_field]:
+                instance.is_active = False
+                instance.email_changed = True
+                instance.save(update_fields=["is_active"])
+        return super().update(instance, validated_data)
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'phone', 'last_name', 'first_name', 'patronymic', 'birth_date', 'mailing',
+                  'personal_data_processing', 'registration_by_code', 'is_active', 'is_verified']
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'loyalty', 'survey', 'loyalty']
+        # depth = 1  # для полного отображения моделей M2M
+
+    def to_representation(self, instance):
+        ret = super(UserInfoSerializer, self).to_representation(instance)
+        ret['new_questions_list'] = [int(_) for _ in instance.survey.new_questions.split()]
+        return ret
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = User
+        fields = ['email', 'phone', 'password', 'last_name', 'first_name', 'patronymic', 'birth_date', 'mailing',
+                  'personal_data_processing', 'registration_by_code']
+
+    def create(self, validated_data):
+        new_user = super(UserCreateSerializer, self).create(validated_data)
+        new_user.set_password(validated_data.get('password', None))
+        print('\nUserCreateSerializer create()\n')
+        new_user.save()
+
+        return new_user
+
+    # def update(self, instance, validated_data):
+    #     validated_data.pop('password')
+    #     print('\n!! UserCreateSerializer update\n')
+    #     print('\nvalidated_data == \n', validated_data)
+    #     super(UserCreateSerializer, self).update(instance, validated_data)
+    #
+    #     return instance
+#### User
+
+
+#### Furniture
+>>>>>>> Stashed changes
 class TagsSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(label="ID объекта", read_only=True, required=False)
 
@@ -81,13 +159,39 @@ class NewsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.News
         fields = ['id', 'title', 'text', 'time_created', 'image']
+<<<<<<< Updated upstream
+=======
+#### NewsList
+
+
+#### OrdersList
+class OrderImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Order_Image
+        fields = ['id', 'image']
+        # depth = 1  # для полного отображения моделей M2M
+
+
+class OrderDocumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Order_Document
+        fields = ['id', 'file', 'name']
+        # depth = 1  # для полного отображения моделей M2M
+>>>>>>> Stashed changes
 
 
 class OrdersListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Order
+<<<<<<< Updated upstream
         fields = ['id', 'number', 'create_date', 'shipment_date', 'status', 'address', 'contract', 'images']
+=======
+        fields = ['id', 'number', 'create_date', 'shipment_date', 'status', 'address', 'order_image_set',
+                  'order_document_set', 'price', 'model_3d']
+>>>>>>> Stashed changes
         depth = 1  # для полного отображения моделей M2M
 
 
@@ -96,7 +200,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Application
         fields = ['id', 'time_created', 'user', 'text', 'last_name', 'first_name', 'patronymic', 'phone',
-                  'contact_type', 'link', 'date_time', 'python_date_time']
+                  'contact_type', 'link', 'date_time']
         # depth = 1  # для полного отображения моделей M2M
 
 

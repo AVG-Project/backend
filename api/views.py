@@ -10,6 +10,10 @@ from . import serializers as my_serializers
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
+<<<<<<< Updated upstream
+=======
+from .permissions import IsAdminOrReadOnly, SameUser, IsOwner
+>>>>>>> Stashed changes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, metadata, mixins
@@ -25,6 +29,12 @@ from rest_framework import serializers
 from django.http import Http404, HttpResponseForbidden
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+<<<<<<< Updated upstream
+=======
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from users import service
+>>>>>>> Stashed changes
 
 # from rest_framework.generics import get_object_or_404
 
@@ -36,6 +46,7 @@ def variables(request):
     return JsonResponse({'all_tags': tags, 'all_categories': furniture_categories})
 
 
+<<<<<<< Updated upstream
 def user_info(request):
     user = request.user
     user_loyalty = False
@@ -52,6 +63,75 @@ def user_info(request):
     return JsonResponse({'is_authenticated': is_authenticated,
                          'user_loyalty': user_loyalty, 'user_survey': user_survey})
 
+=======
+#### User
+class UserDetail(
+                    # mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = my_serializers.UserDetailSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_object(self):
+        obj = get_object_or_404(User, pk=self.request.user.pk)
+        return obj
+
+
+class UserInfo(
+                    # mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    # mixins.CreateModelMixin,
+                    # mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = my_serializers.UserInfoSerializer
+    permission_classes = (IsAuthenticated, SameUser)
+
+    def get_object(self):
+        obj = get_object_or_404(User, pk=self.request.user.pk)
+        return obj
+
+
+
+def all_3d(request):
+    all_orders = Order.objects.all().values('id', 'model_3d')
+
+    return JsonResponse({'all_3d': list(all_orders)})
+
+
+
+
+# def user_info(request):
+#     user = request.user
+#     user_loyalty = False
+#     user_survey = False
+#     is_authenticated = False
+#     new_questions = False
+#     user_id = None
+#     print(request.user)
+#     if user.is_authenticated:
+#         is_authenticated = True
+#         user_id = request.user.pk
+#         try:
+#             if user.loyalty:
+#                 user_loyalty = True
+#             if user.survey:
+#                 user_survey = True
+#                 if user.survey.new_questions:
+#                     new_questions = True
+#                 else:
+#                     new_questions = False
+#         except Exception as e:
+#             pass
+#
+#
+#     return JsonResponse({'is_authenticated': is_authenticated, 'new_questions': new_questions,
+#                          'user_loyalty': user_loyalty, 'user_survey': user_survey, 'user_id': user_id})
+#### User
+>>>>>>> Stashed changes
 
 
 class FurniturePagination(PageNumberPagination):
@@ -102,9 +182,12 @@ def choice_list_to_dict(lst_of_tup):
     return lst
 
 
+<<<<<<< Updated upstream
 
 
 
+=======
+>>>>>>> Stashed changes
 class NewsList(mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     # mixins.CreateModelMixin,
@@ -129,6 +212,7 @@ class OrdersList(mixins.ListModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
+    permission_classes = (IsAuthenticated, IsOwner)
     serializer_class = my_serializers.OrdersListSerializer
     ordering = ['-create_date']
 
@@ -136,18 +220,18 @@ class OrdersList(mixins.ListModelMixin,
     def get_queryset(self):
         pk = self.kwargs.get('pk', None)
         if not pk:
-            return Order.objects.all().order_by('-create_date')
+            return Order.objects.all().filter(user_id=self.request.user.pk).order_by('-create_date')
         return Order.objects.filter(pk=pk)
 
 
-class ApplicationsList(mixins.ListModelMixin,
-                    mixins.RetrieveModelMixin,
+class ApplicationsList(
+                    # mixins.ListModelMixin,
+                    # mixins.RetrieveModelMixin,
                     mixins.CreateModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
 
     serializer_class = my_serializers.ApplicationSerializer
-    ordering = ['-time_created']
 
 
     def get_queryset(self):
@@ -157,7 +241,7 @@ class ApplicationsList(mixins.ListModelMixin,
         return Application.objects.filter(pk=pk)
 
 
-#### Опросник и Анкета todo
+#### Опросник и Анкета
 class SurveyDetail(
                     # mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,

@@ -2,7 +2,9 @@ from django.core.mail import send_mail
 from django.db.models.signals import post_save, m2m_changed, post_delete, pre_delete
 from django.dispatch import receiver
 
+from Istok.settings import SERVER_EMAIL
 from . import models
+
 from users import models as user_models
 from django.contrib.auth.models import User
 # from .models import Order, Application
@@ -23,18 +25,32 @@ def create_order(sender, instance, created, **kwargs):
             buyer_loyalty.save()
             try:
                 user_models.LoyaltyBenefit.objects.create(loyalty=friends_loyalty)
-                text = 'Кодом пользователя воспользовались. Посылается письмо с оповещением'
-                print(text)
-                # todo send_email_user
+                subject = 'Компания ИСТОК'
+                message = f'Вашим кодом лояльности воспользовались при оформлении заказа!\n' \
+                          f'Вам доступен выбор "Выгоды" на странице лояльности в личном кабинете.'
+
+                print(subject, message, [friends_loyalty.user.email], sep='\n')
+                # todo Включить
+                # send_mail(subject, message, SERVER_EMAIL, [friends_loyalty.user.email])
+
             except Exception as e:
-                print(e)
-                #todo send_mail_admin()
+                send_email('Istok_app.signals.create_order()', e, SERVER_EMAIL, SERVER_EMAIL)
         elif not friends_loyalty:
-            #todo send_mail_staff
-            print('В заказе был указан код лояльности, но в базе данных его нет. '
-                  'Возможно при оформлении была допущена ошибка покупателем или сотрудником')
+            subject = f'Указанный код лояльности в заказе отсутствует.'
+            message = f'В заказе {instance.number}, был указан код лояльности: {friends_code}.' \
+                      f'Данный код отсутствует в базе данных. Вероятно заказчик неправильно указал его.'
+
+            print(subject, message, user_models.staff_email_list(), sep='\n')
+            # todo Включить
+            # send_mail(subject, message, SERVER_EMAIL, user_models.staff_email_list())
         else:
-            print('Кодом путаются воспользоваться во второй раз')
+            subject = f'Указанный код уже был использован.'
+            message = f'В заказе {instance.number}, был указан код лояльности: {friends_code}.' \
+                      f'Так как данным кодом уже воспользовались награда не будет выдана.'
+
+            print(subject, message, user_models.staff_email_list(), sep='\n')
+            # todo Включить
+            # send_mail(subject, message, SERVER_EMAIL, user_models.staff_email_list())
 
 
 @receiver(post_save, sender=user_models.LoyaltyBenefit)
@@ -42,7 +58,6 @@ def loyalty_benefit_change(sender, instance, created, **kwargs):
     loyalty = instance.loyalty
     new_benefit = instance.benefit
     if not created and new_benefit:
-        print('if not created and new_benefit:\n\n')
         number_of_bonuses = new_benefit.bonuses_to_add
 
         if number_of_bonuses:
@@ -51,9 +66,14 @@ def loyalty_benefit_change(sender, instance, created, **kwargs):
             loyalty.balance_history = to_balance_history + loyalty.balance_history
             loyalty.save()
         if new_benefit.send_email_to_staff:
-            text = 'todo send_email_staff Пользователем выбран, который должен выдать сотрудник '
-            print(text)
-            # todo send_email_staff
+            subject = f'Пользователь сайта выбрал бонус.'
+            message = f'Пользователь сайта {loyalty.user.email}, выбрал бонус: {new_benefit}.' \
+                      f'Данный бонус может быть выбран только сотрудником.' \
+                      f'После выдачи или отклонения выдачи бонуса не забудьте сменить статус в поле ' \
+                      f'(m2m) Выбранная выгода с (id{instance.pk})'
+            print(subject, message, user_models.staff_email_list(), sep='\n')
+            # todo Включить
+            # send_mail(subject, message, SERVER_EMAIL, user_models.staff_email_list())
 
         loyalty.new_befits = len(list(user_models.LoyaltyBenefit.objects.filter(loyalty=loyalty,
             benefit=None)))
@@ -63,12 +83,24 @@ def loyalty_benefit_change(sender, instance, created, **kwargs):
 @receiver(post_save, sender=models.Survey)
 def auto_create_loyalty(sender, instance, created, **kwargs):
     if created:
+<<<<<<< Updated upstream
         try:
             user_models.Loyalty.objects.create(user=instance.user)
             print('\nauto_create_loyalty\n')
         except Exception as e:
             # todo send_mail_admin
             print(e)
+=======
+        if not user_models.Loyalty.objects.filter(user=instance.user).exists():
+            try:
+                user_models.Loyalty.objects.create(user=instance.user)
+                print('\nauto_create_loyalty\n')
+            except Exception as e:
+                subject = f'auto_create_loyalty'
+                print(subject, e, sep='\n')
+                # todo Включить
+                # send_mail(subject, e, SERVER_EMAIL, SERVER_EMAIL)
+>>>>>>> Stashed changes
 
 
 
@@ -94,29 +126,27 @@ def auto_recommendation(sender, instance, created, **kwargs):
 #                 if order_user != loyalty.user:
 #                     loyalty.increase_balance(instance.order_price)
 
+#todo доделать оправку заказа на связь
 
-# @receiver(post_save, sender=Application)
-# def send_application_email(sender, instance, created, **kwargs):
-#     if created:
-#         subject = 'Новая заявка'
-#         message = f'''
-#         New application details:
-#         Тип мебели: {instance.type}
-#         Форма мебели: {instance.form}
-#         Дополнения: {instance.addition}
-#         Материал фасада: {instance.facades_material}
-#         Материал столешницы: {instance.table_material}
-#         Кухонная сантехника: {instance.plumb}
-#         Бытовая техника: {instance.appliances}
-#         Бюджет проекта: {instance.budget}
-#         Консультация с экспертом по обустройству дома: {instance.consultation}
-#         Фамилия: {instance.last_name}
-#         Имя: {instance.first_name}
-#         Отчество: {instance.patronymic}
-#         Ваш номер телефона: {instance.phone}
-#         Как с Вами связаться?: {instance.connection}
-#         Ваша ссылка на Telegram/ВКонтакте: {instance.link}
-#         Дата: {instance.data}
-#         Время: {instance.time}
-#         '''
-#         send_mail(subject, message, 'myrsin.s@yandex.com', ['eminence_grise@inbox.ru'])
+@receiver(post_save, sender=models.Application)
+def send_application_email(sender, instance, created, **kwargs):
+
+    # instance = models.Application.objects.first()
+    if created:
+        subject = 'Новая заявка.'
+        message = f'''
+            Пользователь формил заявку. 
+            (Пользователь {'Не зарегистрирован' if not instance.user else f'Зарегистрирован - {instance.user.email}'})
+            ФИО - {instance.last_name.capitalize()} {instance.first_name.capitalize()}
+            Номер телефона: {instance.phone}
+            Тип связи: {instance.contact_type}
+            Ссылка: {instance.link}
+            Дата и время: {instance.date_time.strftime("%d.%m.%Y в %H:%M")}
+            Дополнительная информация:
+            {instance.text}
+        '''
+        print(f'send_mail {user_models.staff_email_list()}')
+        print(message)
+        # todo Включить
+        # todo сделать проверку на наличие сотрудников
+        # send_mail(subject, message, SERVER_EMAIL, user_models.staff_email_list())
